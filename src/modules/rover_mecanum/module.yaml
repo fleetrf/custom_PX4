@@ -38,8 +38,8 @@ parameters:
           long: |
             The waypoint transition speed is calculated as:
             Transition_speed = Maximum_speed * (1 - normalized_transition_angle * RM_MISS_VEL_GAIN)
-            The normalized transition angle is the angle between the line segment from prev-curr WP and curr-next WP
-            interpolated from [0, 180] -> [0, 1].
+            The normalized transition angle is the angle between the line segment from prev-curr waypoint and
+            curr-next waypoint interpolated from [0, 180] -> [0, 1].
             Higher value -> More speed reduction during waypoint transitions.
             Set to -1 to disable any speed reduction during waypoint transition.
         type: float

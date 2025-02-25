@@ -194,13 +194,12 @@ private:
 	float _max_yaw_rate{0.f};
 	float _speed_body_x_setpoint{0.f};
 	float _speed_body_y_setpoint{0.f};
-	float _pos_ctl_yaw_setpoint{0.f};
+	float _pos_ctl_yaw_setpoint{0.f}; // Yaw setpoint for manual position mode, NAN if yaw rate is manually controlled [rad]
 	float _dt{0.f};
 	float _auto_speed{0.f};
 	float _auto_yaw{0.f};
 	float _waypoint_transition_angle{0.f}; // Angle between the prevWP-currWP and currWP-nextWP line segments [rad]
 	int _nav_state{0};
-	bool _course_control{false}; // Indicates if the rover is doing course control in manual position mode.
 	bool _mission_finished{false};
 	bool _prev_param_check_passed{true};
 

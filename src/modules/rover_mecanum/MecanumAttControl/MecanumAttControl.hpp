@@ -126,8 +126,7 @@ private:
 	float _vehicle_yaw{0.f};
 	float _dt{0.f};
 	float _max_yaw_rate{0.f};
-	float _stab_yaw_setpoint{0.f}; // Yaw setpoint if rover is doing yaw control in stab mode
-	bool _stab_yaw_ctl{false}; // Indicates if rover is doing yaw control in stab mode
+	float _stab_yaw_setpoint{0.f}; // Yaw setpoint for stab mode, NAN if yaw rate is manually controlled [rad]
 	bool _prev_param_check_passed{true};
 
 	// Controllers

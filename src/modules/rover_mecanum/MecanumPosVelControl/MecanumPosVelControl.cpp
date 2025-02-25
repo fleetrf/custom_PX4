@@ -207,16 +207,16 @@ void MecanumPosVelControl::manualPositionMode()
 		const float yaw_rate_setpoint = math::interpolate<float>(math::deadzone(manual_control_setpoint.yaw,
 						_param_ro_yaw_stick_dz.get()), -1.f, 1.f, -_max_yaw_rate, _max_yaw_rate);
 
-		if (fabsf(yaw_rate_setpoint) > FLT_EPSILON
-		    || (fabsf(_speed_body_x_setpoint) < FLT_EPSILON
-			&& fabsf(_speed_body_y_setpoint) < FLT_EPSILON)) { // Closed loop yaw rate control
-			_course_control = false;
+		if (fabsf(yaw_rate_setpoint) > FLT_EPSILON) { // Closed loop yaw rate control
+			_pos_ctl_yaw_setpoint = NAN;
 			rover_rate_setpoint_s rover_rate_setpoint{};
 			rover_rate_setpoint.timestamp = _timestamp;
 			rover_rate_setpoint.yaw_rate_setpoint = yaw_rate_setpoint;
 			_rover_rate_setpoint_pub.publish(rover_rate_setpoint);
 
-		} else { // Course control if the steering input is zero (keep driving on a straight line)
+		} else if ((fabsf(_speed_body_x_setpoint) > FLT_EPSILON
+			    || fabsf(_speed_body_y_setpoint) >
+			    FLT_EPSILON)) { // Course control if the steering input is zero (keep driving on a straight line)
 			const Vector3f velocity = Vector3f(_speed_body_x_setpoint, _speed_body_y_setpoint, 0.f);
 			const float velocity_magnitude_setpoint = velocity.norm();
 			const Vector3f pos_ctl_course_direction_local = _vehicle_attitude_quaternion.rotateVector(velocity.normalized());
@@ -225,11 +225,10 @@ void MecanumPosVelControl::manualPositionMode()
 
 			// Reset course control if course direction change is above threshold
 			if (fabsf(asinf(pos_ctl_course_direction_temp % _pos_ctl_course_direction)) > _param_rm_course_ctl_th.get()) {
-				_course_control = false;
+				_pos_ctl_yaw_setpoint = NAN;
 			}
 
-			if (!_course_control) {
-				_course_control = true;
+			if (!PX4_ISFINITE(_pos_ctl_yaw_setpoint)) {
 				_pos_ctl_start_position_ned = _curr_pos_ned;
 				_pos_ctl_yaw_setpoint = _vehicle_yaw;
 				_pos_ctl_course_direction = pos_ctl_course_direction_temp;
@@ -248,6 +247,13 @@ void MecanumPosVelControl::manualPositionMode()
 			rover_attitude_setpoint.timestamp = _timestamp;
 			rover_attitude_setpoint.yaw_setpoint = _pos_ctl_yaw_setpoint;
 			_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
+
+		} else { // Reset course control and yaw rate setpoint
+			_pos_ctl_yaw_setpoint = NAN;
+			rover_rate_setpoint_s rover_rate_setpoint{};
+			rover_rate_setpoint.timestamp = _timestamp;
+			rover_rate_setpoint.yaw_rate_setpoint = 0.f;
+			_rover_rate_setpoint_pub.publish(rover_rate_setpoint);
 		}
 	}
 }

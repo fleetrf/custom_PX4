@@ -116,25 +116,33 @@ void MecanumAttControl::generateAttitudeSetpoint()
 			const float yaw_rate_setpoint = math::interpolate<float>(math::deadzone(manual_control_setpoint.yaw,
 							_param_ro_yaw_stick_dz.get()), -1.f, 1.f, -_max_yaw_rate, _max_yaw_rate);
 
-			if (fabsf(yaw_rate_setpoint) > FLT_EPSILON
-			    || fabsf(rover_throttle_setpoint.throttle_body_x) < FLT_EPSILON) { // Closed loop yaw rate control
-				_stab_yaw_ctl = false;
+			if (fabsf(yaw_rate_setpoint) > FLT_EPSILON) { // Closed loop yaw rate control
+				_stab_yaw_setpoint = NAN;
 				_adjusted_yaw_setpoint.setForcedValue(0.f);
 				rover_rate_setpoint_s rover_rate_setpoint{};
 				rover_rate_setpoint.timestamp = _timestamp;
 				rover_rate_setpoint.yaw_rate_setpoint = yaw_rate_setpoint;
 				_rover_rate_setpoint_pub.publish(rover_rate_setpoint);
 
-			} else { // Closed loop yaw control if the yaw rate input is zero (keep current yaw)
-				if (!_stab_yaw_ctl) {
+			} else if (fabsf(rover_throttle_setpoint.throttle_body_x) > FLT_EPSILON
+				   || fabsf(rover_throttle_setpoint.throttle_body_y) >
+				   FLT_EPSILON) { // Closed loop yaw control if the yaw rate input is zero (keep current yaw)
+				if (!PX4_ISFINITE(_stab_yaw_setpoint)) {
 					_stab_yaw_setpoint = _vehicle_yaw;
-					_stab_yaw_ctl = true;
 				}
 
 				rover_attitude_setpoint_s rover_attitude_setpoint{};
 				rover_attitude_setpoint.timestamp = _timestamp;
 				rover_attitude_setpoint.yaw_setpoint = _stab_yaw_setpoint;
 				_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
+
+			} else { // Reset yaw control  and yaw rate setpoint
+				_stab_yaw_setpoint = NAN;
+				_adjusted_yaw_setpoint.setForcedValue(0.f);
+				rover_rate_setpoint_s rover_rate_setpoint{};
+				rover_rate_setpoint.timestamp = _timestamp;
+				rover_rate_setpoint.yaw_rate_setpoint = 0.f;
+				_rover_rate_setpoint_pub.publish(rover_rate_setpoint);
 			}
 
 
