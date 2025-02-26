@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "[docker-entrypoint.sh] Starting"
+
 # Start virtual X server in the background
 # - DISPLAY default is :99, set in dockerfile
 # - Users can override with `-e DISPLAY=` in `docker run` command to avoid
@@ -15,5 +17,7 @@ if [ -n "${ROS_DISTRO}" ]; then
 	echo "[docker-entrypoint.sh] ROS: ${ROS_DISTRO}"
 	source "/opt/ros/$ROS_DISTRO/setup.bash"
 fi
+
+echo "[docker-entrypoint.sh] ($( uname -m ))"
 
 exec "$@"
