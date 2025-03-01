@@ -317,7 +317,6 @@ public:
 	}
 };
 
-using SquareMatrix2f = SquareMatrix<float, 2>;
 using SquareMatrix3f = SquareMatrix<float, 3>;
 using SquareMatrix3d = SquareMatrix<double, 3>;
 
@@ -619,7 +618,6 @@ SquareMatrix <Type, M> choleskyInv(const SquareMatrix<Type, M> &A)
 	return L_inv.T() * L_inv;
 }
 
-using Matrix2f = SquareMatrix<float, 2>;
 using Matrix3f = SquareMatrix<float, 3>;
 using Matrix3d = SquareMatrix<double, 3>;
 

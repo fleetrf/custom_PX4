@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file L3GD20.hpp
+ * @file l3gd20.cpp
  * Driver for the ST L3GD20 MEMS and L3GD20H mems gyros connected via SPI.
  *
  * Note: With the exception of the self-test feature, the ST L3G4200D is

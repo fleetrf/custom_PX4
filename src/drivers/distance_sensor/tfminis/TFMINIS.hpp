@@ -47,7 +47,7 @@
 #include <lib/perf/perf_counter.h>
 
 /* Configuration Constants */
-#define TFMINIS_BASEADDR			0x11 	// 7-bit address. 8-bit address is 0x20.
+#define TFMINIS_BASEADDR			0x12 	// 7-bit address. 8-bit address is 0x20.
 
 /* Device limits */
 #define TFMINIS_MIN_DISTANCE 			(0.01f)

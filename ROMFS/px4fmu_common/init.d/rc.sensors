@@ -119,10 +119,19 @@ then
 	tf02pro start -X
 fi
 
-# tfminis i2c distance sensor
+# tfminis i2c distance sensor; start all distance sensors at once
+# see if it can be replaced with param get to select addr automatically
 if param compare -s SENS_EN_TFMINIS 1
 then
+# weird placeholder... for some reason,the first one never starts an instance
 	tfminis start -X
+# start frwd facing
+	tfminis start -X -b 2 -a 17 -R 0
+# start left facing
+	tfminis start -X -b 2 -a 18 -R 6
+# start rght facing
+	tfminis start -X -b 2 -a 32 -R 2
+
 fi
 
 # ADIS16448 spi external IMU

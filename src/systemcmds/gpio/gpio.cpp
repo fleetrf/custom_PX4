@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file gpio.cpp
+ * @file gpio_test.cpp
  * @author Julian Kent <julian@auterion.com>
  *
  * GPIO read and write tool

@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file io_bypass_control_main.cpp
+ * @file ss_io_timer_test.c
  *
  * Simple daemon that listens uORB actuator_outputs to control PWM output
  * WARNING: No mixer, hence no safety use at your own risk

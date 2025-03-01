@@ -34,7 +34,7 @@ if("${PX4_BOARD_LABEL}" STREQUAL  "bootloader")
 	add_compile_definitions(BOOTLOADER)
 	add_library(drivers_board
 		bootloader_main.c
-		init.cpp
+		init.c
 		usb.c
 		timer_config.cpp
 	)
@@ -52,7 +52,7 @@ else()
 	add_library(drivers_board
 		can.c
 		i2c.cpp
-		init.cpp
+		init.c
 		led.c
 		mtd.cpp
 		sdio.c
@@ -71,6 +71,5 @@ else()
 			nuttx_arch # sdio
 			nuttx_drivers # sdio
 			px4_layer
-			platform_gpio_mcp23009
 	)
 endif()

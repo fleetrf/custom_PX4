@@ -146,14 +146,7 @@ int uORBTest::UnitTest::pubsublatency_main()
 
 	pubsubtest_passed = true;
 
-#if defined(CONFIG_ARCH_BOARD_PX4_SITL)
-	// relaxed on SITL (non-realtime)
-	const float kMaxMeanUs = 1000.f; // 1000 microseconds
-#else
-	const float kMaxMeanUs = 150.f; // 150 microseconds
-#endif
-
-	if (mean > kMaxMeanUs) {
+	if (mean > 150.0f) {
 		pubsubtest_res = PX4_ERROR;
 
 	} else {

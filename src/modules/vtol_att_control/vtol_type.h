@@ -299,7 +299,6 @@ protected:
 	// motors spinning up or cutting too fast when doing transitions.
 	float _thrust_transition = 0.0f;	// thrust value applied during a front transition (tailsitter & tiltrotor only)
 	float _last_thr_in_fw_mode = 0.0f;
-	float _last_thr_in_mc = 0.f;
 
 	hrt_abstime _trans_finished_ts = 0;
 	hrt_abstime _transition_start_timestamp{0};
@@ -317,6 +316,7 @@ protected:
 
 	bool _quadchute_command_treated{false};
 
+	float update_and_get_backtransition_pitch_sp();
 	bool isFrontTransitionCompleted();
 	virtual bool isFrontTransitionCompletedBase();
 

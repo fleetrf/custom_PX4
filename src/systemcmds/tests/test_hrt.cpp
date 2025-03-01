@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file test_hrt.cpp
+ * @file test_hrt.c
  * Tests the high resolution timer.
  */
 

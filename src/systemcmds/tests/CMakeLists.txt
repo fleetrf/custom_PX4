@@ -33,6 +33,7 @@
 
 set(srcs
 	test_atomic_bitset.cpp
+	test_bezierQuad.cpp
 	test_bitset.cpp
 	test_bson.cpp
 	test_dataman.cpp

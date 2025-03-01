@@ -34,8 +34,7 @@
 /**
  * Path navigation roll slew rate limit.
  *
- * Maximum change in roll angle setpoint per second.
- * Applied in all Auto modes, plus manual Position & Altitude modes.
+ * The maximum change in roll angle setpoint per second.
  *
  * @unit deg/s
  * @min 0
@@ -48,7 +47,7 @@ PARAM_DEFINE_FLOAT(FW_PN_R_SLEW_MAX, 90.0f);
 /**
  * NPFG period
  *
- * Period of NPFG control law.
+ * Period of the NPFG control law.
  *
  * @unit s
  * @min 1.0
@@ -62,7 +61,7 @@ PARAM_DEFINE_FLOAT(NPFG_PERIOD, 10.0f);
 /**
  * NPFG damping ratio
  *
- * Damping ratio of NPFG control law.
+ * Damping ratio of the NPFG control law.
  *
  * @min 0.10
  * @max 1.00
@@ -76,7 +75,7 @@ PARAM_DEFINE_FLOAT(NPFG_DAMPING, 0.7f);
  * Enable automatic lower bound on the NPFG period
  *
  * Avoids limit cycling from a too aggressively tuned period/damping combination.
- * If false, also disables upper bound NPFG_PERIOD_UB.
+ * If set to false, also disables the upper bound NPFG_PERIOD_UB.
  *
  * @boolean
  * @group FW NPFG Control
@@ -193,9 +192,9 @@ PARAM_DEFINE_FLOAT(NPFG_PERIOD_SF, 1.5f);
 PARAM_DEFINE_FLOAT(FW_THR_SLEW_MAX, 0.0f);
 
 /**
- * Minimum pitch angle setpoint
+ * Minimum pitch angle
  *
- * Applies in any altitude controlled flight mode.
+ * The minimum pitch angle setpoint for a height-rate or altitude controlled mode.
  *
  * @unit deg
  * @min -60.0
@@ -207,9 +206,9 @@ PARAM_DEFINE_FLOAT(FW_THR_SLEW_MAX, 0.0f);
 PARAM_DEFINE_FLOAT(FW_P_LIM_MIN, -30.0f);
 
 /**
- * Maximum pitch angle setpoint
+ * Maximum pitch angle
  *
- * Applies in any altitude controlled flight mode.
+ * The maximum pitch angle setpoint setpoint for a height-rate or altitude controlled mode.
  *
  * @unit deg
  * @min 0.0
@@ -221,9 +220,9 @@ PARAM_DEFINE_FLOAT(FW_P_LIM_MIN, -30.0f);
 PARAM_DEFINE_FLOAT(FW_P_LIM_MAX, 30.0f);
 
 /**
- * Maximum roll angle setpoint
+ * Maximum roll angle
  *
- * Applies in any altitude controlled flight mode.
+ * The maximum roll angle setpoint for setpoint for a height-rate or altitude controlled mode.
  *
  * @unit deg
  * @min 35.0
@@ -237,7 +236,7 @@ PARAM_DEFINE_FLOAT(FW_R_LIM, 50.0f);
 /**
  * Throttle limit max
  *
- * Applies in any altitude controlled flight mode.
+ * Maximum throttle limit in altitude controlled modes.
  * Should be set accordingly to achieve FW_T_CLMB_MAX.
  *
  * @unit norm
@@ -252,9 +251,12 @@ PARAM_DEFINE_FLOAT(FW_THR_MAX, 1.0f);
 /**
  * Throttle limit min
  *
- * Applies in any altitude controlled flight mode.
+ * Minimum throttle limit in altitude controlled modes.
  * Usually set to 0 but can be increased to prevent the motor from stopping when
  * descending, which can increase achievable descent rates.
+ *
+ * For aircraft with internal combustion engine this parameter should be set
+ * for desired idle rpm.
  *
  * @unit norm
  * @min 0.0
@@ -268,7 +270,13 @@ PARAM_DEFINE_FLOAT(FW_THR_MIN, 0.0f);
 /**
  * Idle throttle
  *
- * This is the minimum throttle while on the ground ("landed") in auto modes.
+ * This is the minimum throttle while on the ground
+ *
+ * For aircraft with internal combustion engines, this parameter should be set
+ * above the desired idle rpm. For electric motors, idle should typically be set
+ * to zero.
+ *
+ * Note that in automatic modes, "landed" conditions will engage idle throttle.
  *
  * @unit norm
  * @min 0.0
@@ -309,9 +317,9 @@ PARAM_DEFINE_FLOAT(FW_TKO_PITCH_MIN, 10.0f);
 /**
  * Takeoff Airspeed
  *
- * The calibrated airspeed setpoint during the takeoff climbout.
+ * The calibrated airspeed setpoint TECS will stabilize to during the takeoff climbout.
  *
- * If set <= 0, FW_AIRSPD_MIN will be set by default.
+ * If set <= 0.0, FW_AIRSPD_MIN will be set by default.
  *
  * @unit m/s
  * @min -1.0
@@ -335,9 +343,9 @@ PARAM_DEFINE_FLOAT(FW_TKO_AIRSPD, -1.0f);
 PARAM_DEFINE_FLOAT(FW_LND_FLALT, 0.5f);
 
 /**
- * Use terrain estimation during landing.
+ * Use terrain estimation during landing. This is critical for detecting when to flare, and should be enabled if possible.
  *
- * This is critical for detecting when to flare, and should be enabled if possible.
+ * NOTE: terrain estimate is currently solely derived from a distance sensor.
  *
  * If enabled and no measurement is found within a given timeout, the landing waypoint altitude will be used OR the landing
  * will be aborted, depending on the criteria set in FW_LND_ABORT.
@@ -356,9 +364,9 @@ PARAM_DEFINE_INT32(FW_LND_USETER, 1);
 /**
  * Early landing configuration deployment
  *
- * Allows to deploy the landing configuration (flaps, landing airspeed, etc.) already in
- * the loiter-down waypoint before the final approach.
- * Otherwise is enabled only in the final approach.
+ * When disabled, the landing configuration (flaps, landing airspeed, etc.) is only activated
+ * on the final approach to landing. When enabled, it is already activated when entering the
+ * final loiter-down (loiter-to-alt) waypoint before the landing approach.
  *
  * @boolean
  *
@@ -369,7 +377,8 @@ PARAM_DEFINE_INT32(FW_LND_EARLYCFG, 0);
 /**
  * Flare, minimum pitch
  *
- * Minimum pitch during landing flare.
+ * Minimum pitch during flare, a positive sign means nose up
+ * Applied once flaring is triggered
  *
  * @unit deg
  * @min -5
@@ -383,7 +392,8 @@ PARAM_DEFINE_FLOAT(FW_LND_FL_PMIN, 2.5f);
 /**
  * Flare, maximum pitch
  *
- * Maximum pitch during landing flare.
+ * Maximum pitch during flare, a positive sign means nose up
+ * Applied once flaring is triggered
  *
  * @unit deg
  * @min 0
@@ -399,7 +409,7 @@ PARAM_DEFINE_FLOAT(FW_LND_FL_PMAX, 15.0f);
  *
  * The calibrated airspeed setpoint during landing.
  *
- * If set <= 0, landing airspeed = FW_AIRSPD_MIN by default.
+ * If set <= 0.0, landing airspeed = FW_AIRSPD_MIN by default.
  *
  * @unit m/s
  * @min -1.0
@@ -410,9 +420,11 @@ PARAM_DEFINE_FLOAT(FW_LND_FL_PMAX, 15.0f);
 PARAM_DEFINE_FLOAT(FW_LND_AIRSPD, -1.f);
 
 /**
- * Altitude time constant factor for landing and low-height flight
+ * Altitude time constant factor for landing
  *
- * The TECS altitude time constant (FW_T_ALT_TC) is multiplied by this value.
+ * Set this parameter to less than 1.0 to make TECS react faster to altitude errors during
+ * landing than during normal flight. During landing, the TECS
+ * altitude time constant (FW_T_ALT_TC) is multiplied by this value.
  *
  * @unit
  * @min 0.2
@@ -423,24 +435,6 @@ PARAM_DEFINE_FLOAT(FW_LND_AIRSPD, -1.f);
  */
 PARAM_DEFINE_FLOAT(FW_LND_THRTC_SC, 1.0f);
 
-/**
- * Low-height threshold for tighter altitude tracking
- *
- * Height above ground threshold below which tighter altitude
- * tracking gets enabled (see FW_LND_THRTC_SC). Below this height, TECS smoothly
- * (1 sec / sec) transitions the altitude tracking time constant from FW_T_ALT_TC
- * to FW_LND_THRTC_SC*FW_T_ALT_TC.
- *
- * -1 to disable.
- *
- * @unit m
- * @min -1
- * @decimal 0
- * @increment 1
- * @group FW TECS
- */
-PARAM_DEFINE_FLOAT(FW_T_THR_LOW_HGT, -1.f);
-
 /*
  * TECS parameters
  *
@@ -448,6 +442,12 @@ PARAM_DEFINE_FLOAT(FW_T_THR_LOW_HGT, -1.f);
 
 /**
  * Maximum descent rate
+ *
+ * This sets the maximum descent rate that the controller will use.
+ * If this value is too large, the aircraft can over-speed on descent.
+ * This should be set to a value that can be achieved without
+ * exceeding the lower pitch angle limit and without over-speeding
+ * the aircraft.
  *
  * @unit m/s
  * @min 1.0
@@ -462,6 +462,7 @@ PARAM_DEFINE_FLOAT(FW_T_SINK_MAX, 5.0f);
  * Throttle damping factor
  *
  * This is the damping gain for the throttle demand loop.
+ * Increase to add damping to correct for oscillations in speed and height.
  *
  * @min 0.0
  * @max 1.0
@@ -474,6 +475,7 @@ PARAM_DEFINE_FLOAT(FW_T_THR_DAMPING, 0.05f);
 /**
  * Integrator gain throttle
  *
+ * Integrator gain on the throttle part of the control loop.
  * Increase it to trim out speed and height offsets faster,
  * with the downside of possible overshoots and oscillations.
  *
@@ -488,6 +490,7 @@ PARAM_DEFINE_FLOAT(FW_T_THR_INTEG, 0.02f);
 /**
  * Integrator gain pitch
  *
+ * Integrator gain on the pitch part of the control loop.
  * Increase it to trim out speed and height offsets faster,
  * with the downside of possible overshoots and oscillations.
  *
@@ -502,9 +505,11 @@ PARAM_DEFINE_FLOAT(FW_T_I_GAIN_PIT, 0.1f);
 /**
  * Maximum vertical acceleration
  *
- * This is the maximum vertical acceleration
+ * This is the maximum vertical acceleration (in m/s/s)
  * either up or down that the controller will use to correct speed
- * or height errors.
+ * or height errors. The default value of 7 m/s/s (equivalent to +- 0.7 g)
+ * allows for reasonably aggressive pitch changes if required to recover
+ * from under-speed conditions.
  *
  * @unit m/s^2
  * @min 1.0
@@ -516,9 +521,9 @@ PARAM_DEFINE_FLOAT(FW_T_I_GAIN_PIT, 0.1f);
 PARAM_DEFINE_FLOAT(FW_T_VERT_ACC, 7.0f);
 
 /**
- * Airspeed measurement standard deviation
+ * Airspeed measurement standard deviation for airspeed filter.
  *
- * For the airspeed filter in TECS.
+ * This is the measurement standard deviation for the airspeed used in the airspeed filter in TECS.
  *
  * @unit m/s
  * @min 0.01
@@ -530,9 +535,9 @@ PARAM_DEFINE_FLOAT(FW_T_VERT_ACC, 7.0f);
 PARAM_DEFINE_FLOAT(FW_T_SPD_STD, 0.07f);
 
 /**
- * Airspeed rate measurement standard deviation
+ * Airspeed rate measurement standard deviation for airspeed filter.
  *
- * For the airspeed filter in TECS.
+ * This is the measurement standard deviation for the airspeed rate used in the airspeed filter in TECS.
  *
  * @unit m/s^2
  * @min 0.01
@@ -544,10 +549,12 @@ PARAM_DEFINE_FLOAT(FW_T_SPD_STD, 0.07f);
 PARAM_DEFINE_FLOAT(FW_T_SPD_DEV_STD, 0.2f);
 
 /**
- * Process noise standard deviation for the airspeed rate
+ * Process noise standard deviation for the airspeed rate in the airspeed filter.
  *
- * This is defining the noise in the airspeed rate for the constant airspeed rate model
- * of the TECS airspeed filter.
+ * This is the process noise standard deviation in the airspeed filter filter defining the noise in the
+ * airspeed rate for the constant airspeed rate model. This is used to define how much the airspeed and
+ * the airspeed rate are filtered. The smaller the value the more the measurements are smoothed with the
+ * drawback for delays.
  *
  * @unit m/s^2
  * @min 0.01
@@ -562,9 +569,14 @@ PARAM_DEFINE_FLOAT(FW_T_SPD_PRC_STD, 0.2f);
 /**
  * Roll -> Throttle feedforward
  *
- * Is used to compensate for the additional drag created by turning.
- * Increase this gain if the aircraft initially loses energy in turns
- * and reduce if the aircraft initially gains energy in turns.
+ * Increasing this gain turn increases the amount of throttle that will
+ * be used to compensate for the additional drag created by turning.
+ * Ideally this should be set to  approximately 10 x the extra sink rate
+ * in m/s created by a 45 degree bank turn. Increase this gain if
+ * the aircraft initially loses energy in turns and reduce if the
+ * aircraft initially gains energy in turns. Efficient high aspect-ratio
+ * aircraft (eg powered sailplanes) can use a lower value, whereas
+ * inefficient low aspect-ratio models (eg delta wings) can use a higher value.
  *
  * @min 0.0
  * @max 20.0
@@ -575,12 +587,17 @@ PARAM_DEFINE_FLOAT(FW_T_SPD_PRC_STD, 0.2f);
 PARAM_DEFINE_FLOAT(FW_T_RLL2THR, 15.0f);
 
 /**
- * Speed <--> Altitude weight
+ * Speed <--> Altitude priority
  *
- * Adjusts the amount of weighting that the pitch control
- * applies to speed vs height errors.
- * 0 -> control height only
- * 2 -> control speed only (gliders)
+ * This parameter adjusts the amount of weighting that the pitch control
+ * applies to speed vs height errors. Setting it to 0.0 will cause the
+ * pitch control to control height and ignore speed errors. This will
+ * normally improve height accuracy but give larger airspeed errors.
+ * Setting it to 2.0 will cause the pitch control loop to control speed
+ * and ignore height errors. This will normally reduce airspeed errors,
+ * but give larger height errors. The default value of 1.0 allows the pitch
+ * control to simultaneously control height and speed.
+ * Set to 2 for gliders.
  *
  * @min 0.0
  * @max 2.0
@@ -591,7 +608,12 @@ PARAM_DEFINE_FLOAT(FW_T_RLL2THR, 15.0f);
 PARAM_DEFINE_FLOAT(FW_T_SPDWEIGHT, 1.0f);
 
 /**
- * Pitch damping gain
+ * Pitch damping factor
+ *
+ * This is the damping gain for the pitch demand loop. Increase to add
+ * damping to correct for oscillations in height. The default value of 0.0
+ * will work well provided the pitch to servo controller has been tuned
+ * properly.
  *
  * @min 0.0
  * @max 2.0
@@ -610,18 +632,6 @@ PARAM_DEFINE_FLOAT(FW_T_PTCH_DAMP, 0.1f);
  * @group FW TECS
  */
 PARAM_DEFINE_FLOAT(FW_T_ALT_TC, 5.0f);
-
-/**
- * Fast descend: minimum altitude error
- *
- * Minimum altitude error needed to descend with max airspeed and minimal throttle.
- * A negative value disables fast descend.
- *
- * @min -1.0
- * @decimal 0
- * @group FW TECS
- */
-PARAM_DEFINE_FLOAT(FW_T_F_ALT_ERR, -1.0f);
 
 /**
  * Height rate feed forward
@@ -660,9 +670,9 @@ PARAM_DEFINE_FLOAT(FW_T_TAS_TC, 5.0f);
 PARAM_DEFINE_FLOAT(FW_GND_SPD_MIN, 5.0f);
 
 /**
- * Custom stick configuration
+ * RC stick configuration fixed-wing.
  *
- * Applies in manual Position and Altitude flight modes.
+ * Set RC/joystick configuration for fixed-wing manual position and altitude controlled flight.
  *
  * @min 0
  * @max 3
@@ -700,8 +710,9 @@ PARAM_DEFINE_FLOAT(FW_T_SEB_R_FF, 1.0f);
 /**
  * Default target climbrate.
  *
- * In auto modes: default climb rate output by controller to achieve altitude setpoints.
- * In manual modes: maximum climb rate setpoint.
+ * The default rate at which the vehicle will climb in autonomous modes to achieve altitude setpoints.
+ * In manual modes this defines the maximum rate at which the altitude setpoint can be increased.
+ *
  *
  * @unit m/s
  * @min 0.5
@@ -715,8 +726,9 @@ PARAM_DEFINE_FLOAT(FW_T_CLMB_R_SP, 3.0f);
 /**
  * Default target sinkrate.
  *
- * In auto modes: default sink rate output by controller to achieve altitude setpoints.
- * In manual modes: maximum sink rate setpoint.
+ *
+ * The default rate at which the vehicle will sink in autonomous modes to achieve altitude setpoints.
+ * In manual modes this defines the maximum rate at which the altitude setpoint can be decreased.
  *
  * @unit m/s
  * @min 0.5
@@ -730,7 +742,7 @@ PARAM_DEFINE_FLOAT(FW_T_SINK_R_SP, 2.0f);
 /**
  * GPS failure loiter time
  *
- * The time the system should do open loop loiter and wait for GPS recovery
+ * The time in seconds the system should do open loop loiter and wait for GPS recovery
  * before it starts descending. Set to 0 to disable. Roll angle is set to FW_GPSF_R.
  * Does only apply for fixed-wing vehicles or VTOLs with NAV_FORCE_VT set to 0.
  *
@@ -744,7 +756,7 @@ PARAM_DEFINE_INT32(FW_GPSF_LT, 30);
 /**
  * GPS failure fixed roll angle
  *
- * Roll angle in GPS failure loiter mode.
+ * Roll in degrees during the loiter after the vehicle has lost GPS in an auto mode (e.g. mission or loiter).
  *
  * @unit deg
  * @min 0.0
@@ -853,7 +865,7 @@ PARAM_DEFINE_FLOAT(FW_LND_TD_OFF, 3.0);
  * Approach path nudging: shifts the touchdown point laterally along with the entire approach path
  *
  * This is useful for manually adjusting the landing point in real time when map or GNSS errors cause an offset from the
- * desired landing vector. Nudging is done with yaw stick, constrained to FW_LND_TD_OFF (in meters) and the direction is
+ * desired landing vector. Nuding is done with yaw stick, constrained to FW_LND_TD_OFF (in meters) and the direction is
  * relative to the vehicle heading (stick deflection to the right = land point moves to the right as seen by the vehicle).
  *
  * @min 0
@@ -892,6 +904,7 @@ PARAM_DEFINE_INT32(FW_LND_ABORT, 3);
  * Multiplying this factor with the current absolute wind estimate gives the airspeed offset
  * added to the minimum airspeed setpoint limit. This helps to make the
  * system more robust against disturbances (turbulence) in high wind.
+ * Only applies to AUTO flight mode.
  *
  * @min 0
  * @decimal 2
@@ -952,3 +965,15 @@ PARAM_DEFINE_FLOAT(FW_FLAPS_LND_SCL, 1.0f);
  * @group FW Attitude Control
  */
 PARAM_DEFINE_FLOAT(FW_SPOILERS_LND, 0.f);
+
+/**
+ * Spoiler descend setting
+ *
+ * @unit norm
+ * @min 0.0
+ * @max 1.0
+ * @decimal 2
+ * @increment 0.01
+ * @group FW Attitude Control
+ */
+PARAM_DEFINE_FLOAT(FW_SPOILERS_DESC, 0.f);

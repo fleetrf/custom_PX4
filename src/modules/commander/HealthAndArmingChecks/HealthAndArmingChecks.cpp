@@ -50,13 +50,11 @@ HealthAndArmingChecks::HealthAndArmingChecks(ModuleParams *parent, vehicle_statu
 	_failsafe_flags.home_position_invalid = true;
 }
 
-bool HealthAndArmingChecks::update(bool force_reporting, bool is_arming_request)
+bool HealthAndArmingChecks::update(bool force_reporting)
 {
 	_reporter.reset();
 
 	_reporter.prepare(_context.status().vehicle_type);
-
-	_context.setIsArmingRequest(is_arming_request);
 
 	for (unsigned i = 0; i < sizeof(_checks) / sizeof(_checks[0]); ++i) {
 		if (!_checks[i]) {
@@ -67,7 +65,7 @@ bool HealthAndArmingChecks::update(bool force_reporting, bool is_arming_request)
 	}
 
 	const bool results_changed = _reporter.finalize();
-	const bool reported = _reporter.report(force_reporting);
+	const bool reported = _reporter.report(_context.isArmed(), force_reporting);
 
 	if (reported) {
 
@@ -89,7 +87,7 @@ bool HealthAndArmingChecks::update(bool force_reporting, bool is_arming_request)
 		}
 
 		_reporter.finalize();
-		_reporter.report(false);
+		_reporter.report(_context.isArmed(), false);
 		_reporter._mavlink_log_pub = nullptr;
 		// LEGACY end
 
@@ -119,9 +117,4 @@ void HealthAndArmingChecks::updateParams()
 
 		_checks[i]->updateParams();
 	}
-}
-
-bool HealthAndArmingChecks::reportIfUnreportedDifferences()
-{
-	return _reporter.reportIfUnreportedDifferences();
 }

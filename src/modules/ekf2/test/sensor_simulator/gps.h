@@ -66,7 +66,6 @@ public:
 	void setPdop(const float pdop);
 
 	gnssSample getDefaultGpsData();
-	const gnssSample &getData() const { return _gps_data; }
 
 private:
 	void send(uint64_t time) override;

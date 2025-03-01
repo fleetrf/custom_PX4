@@ -172,3 +172,4 @@ private:
 	char _device[64] {};
 	PerformanceData _performance_data{};
 };
+

@@ -202,7 +202,7 @@ void LoadMon::cpuload()
 			}
 		}
 
-		fseek(_proc_fd, 0, SEEK_SET);
+		fseek(_proc_fd, 0, SEEK_END);
 
 		if (parsedCount == 5) {
 			int32_t kb_main_cached = kb_page_cache + kb_slab_reclaimable;

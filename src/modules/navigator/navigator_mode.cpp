@@ -42,9 +42,8 @@
 #include "navigator_mode.h"
 #include "navigator.h"
 
-NavigatorMode::NavigatorMode(Navigator *navigator, uint8_t navigator_state_id) :
-	_navigator(navigator),
-	_navigator_state_id(navigator_state_id)
+NavigatorMode::NavigatorMode(Navigator *navigator) :
+	_navigator(navigator)
 {
 	/* set initial mission items */
 	on_inactivation();
@@ -61,7 +60,6 @@ NavigatorMode::run(bool active)
 		} else {
 			/* periodic updates when active */
 			on_active();
-			updateFailsafeChecks();
 		}
 
 	} else {

@@ -47,7 +47,6 @@
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/home_position.h>
-#include <uORB/topics/navigator_mission_item.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/rtl_time_estimate.h>
 #include <uORB/topics/vehicle_global_position.h>
@@ -92,13 +91,6 @@ public:
 	void on_active() override;
 
 	/**
-	 * @brief on inactive
-	 * Poll required topics also when incative for rtl time estimate.
-	 *
-	 */
-	void on_inactive() override;
-
-	/**
 	 * @brief Calculate the estimated time needed to return to launch.
 	 *
 	 * @return estimated time to return to launch.
@@ -109,8 +101,6 @@ public:
 	void setRtlAlt(float alt) {_rtl_alt = alt;};
 
 	void setRtlPosition(PositionYawSetpoint position, loiter_point_s loiter_pos);
-
-	bool isLanding() { return (_rtl_state != RTLState::IDLE) && (_rtl_state >= RTLState::LOITER_DOWN);};
 
 private:
 	/**
@@ -131,12 +121,6 @@ private:
 
 private:
 	/**
-	 * @brief Update the RTL state machine.
-	 *
-	 */
-	void _updateRtlState();
-
-	/**
 	 * @brief Set the return to launch control setpoint.
 	 *
 	 */
@@ -152,12 +136,6 @@ private:
 	 * Check for parameter changes and update them if needed.
 	 */
 	void parameters_update();
-
-	/**
-	 * @brief Publish navigator mission item
-	 *
-	 */
-	void publish_rtl_direct_navigator_mission_item();
 
 	RTLState getActivationLandState();
 
@@ -189,5 +167,4 @@ private:
 	uORB::SubscriptionData<vehicle_land_detected_s> _land_detected_sub{ORB_ID(vehicle_land_detected)};	/**< vehicle land detected subscription */
 	uORB::SubscriptionData<vehicle_status_s> _vehicle_status_sub{ORB_ID(vehicle_status)};	/**< vehicle status subscription */
 	uORB::SubscriptionData<wind_s>		_wind_sub{ORB_ID(wind)};
-	uORB::Publication<navigator_mission_item_s> _navigator_mission_item_pub{ORB_ID::navigator_mission_item}; /**< Navigator mission item publication*/
 };

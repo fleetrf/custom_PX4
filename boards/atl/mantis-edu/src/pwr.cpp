@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /**
- * @file pwr.cpp
+ * @file pwr.c
  *
  * Board-specific power button functions.
  */

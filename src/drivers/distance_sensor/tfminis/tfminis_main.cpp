@@ -31,13 +31,6 @@
  *
  ****************************************************************************/
 
-/*		25: ROTATION_DOWNWARD_FACING
-                24: ROTATION_UPWARD_FACING
-                12: ROTATION_BACKWARD_FACING
-                0: ROTATION_FORWARD_FACING
-                6: ROTATION_LEFT_FACING
-                2: ROTATION_RIGHT_FACING*/
-
 #include "TFMINIS.hpp"
 
 #include <px4_platform_common/getopt.h>
@@ -50,7 +43,7 @@ TFMINIS::print_usage()
 	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
 	PRINT_MODULE_USAGE_COMMAND("start");
 	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
-	PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x11);
+	PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x12);
 	PRINT_MODULE_USAGE_PARAM_INT('R', 25, 0, 25, "Sensor rotation - downward facing by default", true);
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 }
@@ -68,6 +61,7 @@ extern "C" __EXPORT int tfminis_main(int argc, char *argv[])
 		switch (ch) {
 		case 'R':
 			cli.rotation = (Rotation)atoi(cli.optArg());
+			PX4_INFO("rotation is %d", ch);
 			break;
 		}
 	}

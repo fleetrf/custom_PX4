@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file QueueBuffer.hpp
+ * @file QueueBuffer.cpp
  *
  * A very lightweight QueueBuffer implemtnation
  *

@@ -38,6 +38,7 @@
 #include <lib/geo/geo.h>
 #include <lib/atmosphere/atmosphere.h>
 
+
 namespace sensors
 {
 
@@ -45,9 +46,6 @@ using namespace matrix;
 using namespace atmosphere;
 
 static constexpr uint32_t SENSOR_TIMEOUT{300_ms};
-static constexpr float DEFAULT_TEMPERATURE_CELSIUS = 15.f;
-static constexpr float TEMPERATURE_MIN_CELSIUS = -60.f;
-static constexpr float TEMPERATURE_MAX_CELSIUS = 60.f;
 
 VehicleAirData::VehicleAirData() :
 	ModuleParams(nullptr),
@@ -80,23 +78,21 @@ void VehicleAirData::Stop()
 	}
 }
 
-float VehicleAirData::AirTemperatureUpdate(const float temperature_baro, TemperatureSource &source,
-		const hrt_abstime time_now_us)
+void VehicleAirData::AirTemperatureUpdate()
 {
-	// use the temperature from the differential pressure sensor if available
-	// otherwise use the temperature from the external barometer
-	// Temperature measurements from internal baros are not used as typically not representative for ambient temperature
-	float temperature = source == TemperatureSource::EXTERNAL_BARO ? temperature_baro : DEFAULT_TEMPERATURE_CELSIUS;
 	differential_pressure_s differential_pressure;
 
-	if (_differential_pressure_sub.copy(&differential_pressure)
-	    && time_now_us - differential_pressure.timestamp_sample < 1_s
-	    && PX4_ISFINITE(differential_pressure.temperature)) {
-		temperature = differential_pressure.temperature;
-		source = TemperatureSource::AIRSPEED;
-	}
+	static constexpr float temperature_min_celsius = -20.f;
+	static constexpr float temperature_max_celsius = 35.f;
 
-	return math::constrain(temperature, TEMPERATURE_MIN_CELSIUS, TEMPERATURE_MAX_CELSIUS);
+	// update air temperature if data from differential pressure sensor is finite and not exactly 0
+	// limit the range to max 35°C to limt the error due to heated up airspeed sensors prior flight
+	if (_differential_pressure_sub.update(&differential_pressure) && PX4_ISFINITE(differential_pressure.temperature)
+	    && fabsf(differential_pressure.temperature) > FLT_EPSILON) {
+
+		_air_temperature_celsius = math::constrain(differential_pressure.temperature, temperature_min_celsius,
+					   temperature_max_celsius);
+	}
 }
 
 bool VehicleAirData::ParametersUpdate(bool force)
@@ -144,8 +140,7 @@ void VehicleAirData::Run()
 
 	const bool parameter_update = ParametersUpdate();
 
-	estimator_status_flags_s estimator_status_flags;
-	const bool estimator_status_flags_updated = _estimator_status_flags_sub.update(&estimator_status_flags);
+	AirTemperatureUpdate();
 
 	bool updated[MAX_SENSOR_COUNT] {};
 
@@ -193,18 +188,7 @@ void VehicleAirData::Run()
 							_sensor_sub[uorb_index].registerCallback();
 						}
 
-						if (!_calibration[uorb_index].calibrated()) {
-							_calibration[uorb_index].set_device_id(report.device_id);
-							_calibration[uorb_index].ParametersSave(uorb_index);
-							param_notify_changes();
-						}
-
 						ParametersUpdate(true);
-					}
-
-					if (estimator_status_flags_updated && _selected_sensor_sub_index >= 0 && _selected_sensor_sub_index == uorb_index
-					    && estimator_status_flags.cs_baro_fault && !_last_status_baro_fault) {
-						_priority[uorb_index] = 1; // 1 is min priority while still being enabled
 					}
 
 					// pressure corrected with offset (if available)
@@ -226,10 +210,6 @@ void VehicleAirData::Run()
 				}
 			}
 		}
-	}
-
-	if (estimator_status_flags_updated) {
-		_last_status_baro_fault = estimator_status_flags.cs_baro_fault;
 	}
 
 	// check for the current best sensor
@@ -263,7 +243,7 @@ void VehicleAirData::Run()
 
 				const hrt_abstime timestamp_sample = _timestamp_sample_sum[instance] / _data_sum_count[instance];
 
-				if (time_now_us >= _last_publication_timestamp[instance] + interval_us) {
+				if (timestamp_sample >= _last_publication_timestamp[instance] + interval_us) {
 
 					bool publish = (time_now_us <= timestamp_sample + 1_s);
 
@@ -275,33 +255,30 @@ void VehicleAirData::Run()
 
 					if (publish) {
 						const float pressure_pa = _data_sum[instance] / _data_sum_count[instance];
-						const float temperature_baro = _temperature_sum[instance] / _data_sum_count[instance];
-						TemperatureSource temperature_source = _calibration[instance].external() ? TemperatureSource::EXTERNAL_BARO :
-										       TemperatureSource::DEFAULT_TEMP;
-						const float ambient_temperature = AirTemperatureUpdate(temperature_baro, temperature_source, time_now_us);
+						const float temperature = _temperature_sum[instance] / _data_sum_count[instance];
 
 						const float pressure_sealevel_pa = _param_sens_baro_qnh.get() * 100.f;
 						const float altitude = getAltitudeFromPressure(pressure_pa, pressure_sealevel_pa);
 
 						// calculate air density
-						const float air_density = getDensityFromPressureAndTemp(pressure_pa, ambient_temperature);
+						const float air_density = getDensityFromPressureAndTemp(pressure_pa, temperature);
 
 						// populate vehicle_air_data with and publish
 						vehicle_air_data_s out{};
 						out.timestamp_sample = timestamp_sample;
 						out.baro_device_id = _calibration[instance].device_id();
 						out.baro_alt_meter = altitude;
-						out.ambient_temperature = ambient_temperature;
-						out.temperature_source = static_cast<uint8_t>(temperature_source);
+						out.baro_temp_celcius = temperature;
 						out.baro_pressure_pa = pressure_pa;
 						out.rho = air_density;
+						out.eas2tas = sqrtf(kAirDensitySeaLevelStandardAtmos / math::max(air_density, FLT_EPSILON));
 						out.calibration_count = _calibration[instance].calibration_count();
 						out.timestamp = hrt_absolute_time();
 
 						_vehicle_air_data_pub.publish(out);
 					}
 
-					_last_publication_timestamp[instance] = time_now_us;
+					_last_publication_timestamp[instance] = timestamp_sample;
 
 					// reset
 					_timestamp_sample_sum[instance] = 0;

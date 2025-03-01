@@ -74,6 +74,13 @@ enum class COMPARE_ERROR_LEVEL {
 	SILENT = 1,
 };
 
+
+#ifdef __PX4_QURT
+#define PARAM_PRINT PX4_INFO
+#else
+#define PARAM_PRINT PX4_INFO_RAW
+#endif
+
 static int 	do_save(const char *param_file_name);
 static int	do_save_default();
 static int 	do_load(const char *param_file_name);
@@ -508,10 +515,10 @@ do_save_default()
 static int
 do_show(const char *search_string, bool only_changed)
 {
-	PX4_INFO_RAW("Symbols: x = used, + = saved, * = unsaved\n");
+	PARAM_PRINT("Symbols: x = used, + = saved, * = unsaved\n");
 	// also show unused params if we show non-default values only
 	param_foreach(do_show_print, (char *)search_string, only_changed, !only_changed);
-	PX4_INFO_RAW("\n %u/%u parameters used.\n", param_count_used(), param_count());
+	PARAM_PRINT("\n %u/%u parameters used.\n", param_count_used(), param_count());
 
 	return 0;
 }
@@ -523,7 +530,7 @@ do_show_for_airframe()
 	int32_t sys_autostart = 0;
 	param_get(param_find("SYS_AUTOSTART"), &sys_autostart);
 	if (sys_autostart != 0) {
-		PX4_INFO_RAW("# Make sure to add all params from the current airframe (ID=%" PRId32 ") as well\n", sys_autostart);
+		PARAM_PRINT("# Make sure to add all params from the current airframe (ID=%" PRId32 ") as well\n", sys_autostart);
 	}
 	return 0;
 }
@@ -531,9 +538,9 @@ do_show_for_airframe()
 static int
 do_show_all()
 {
-	PX4_INFO_RAW("Symbols: x = used, + = saved, * = unsaved\n");
+	PARAM_PRINT("Symbols: x = used, + = saved, * = unsaved\n");
 	param_foreach(do_show_print, nullptr, false, false);
-	PX4_INFO_RAW("\n %u parameters total, %u used.\n", param_count(), param_count_used());
+	PARAM_PRINT("\n %u parameters total, %u used.\n", param_count(), param_count_used());
 
 	return 0;
 }
@@ -553,14 +560,14 @@ do_show_quiet(const char *param_name)
 	switch (param_type(param)) {
 	case PARAM_TYPE_INT32:
 		if (!param_get(param, &ii)) {
-			PX4_INFO_RAW("%ld\n", (long)ii);
+			PARAM_PRINT("%ld", (long)ii);
 		}
 
 		break;
 
 	case PARAM_TYPE_FLOAT:
 		if (!param_get(param, &ff)) {
-			PX4_INFO_RAW("%4.4f\n", (double)ff);
+			PARAM_PRINT("%4.4f", (double)ff);
 		}
 
 		break;
@@ -582,7 +589,7 @@ do_find(const char *name)
 		return 1;
 	}
 
-	PX4_INFO_RAW("Found param %s at index %i\n", name, (int)ret);
+	PARAM_PRINT("Found param %s at index %i\n", name, (int)ret);
 	return 0;
 }
 
@@ -607,27 +614,27 @@ do_show_index(const char *index, bool used_index)
 		return 1;
 	}
 
-	PX4_INFO_RAW("index %d: %c %c %s [%d,%d] : ", i, (param_used(param) ? 'x' : ' '),
+	PARAM_PRINT("index %d: %c %c %s [%d,%d] : ", i, (param_used(param) ? 'x' : ' '),
 		    param_value_unsaved(param) ? '*' : (param_value_is_default(param) ? ' ' : '+'),
 		    param_name(param), param_get_used_index(param), param_get_index(param));
 
 	switch (param_type(param)) {
 	case PARAM_TYPE_INT32:
 		if (!param_get(param, &ii)) {
-			PX4_INFO_RAW("%ld\n", (long)ii);
+			PARAM_PRINT("%ld\n", (long)ii);
 		}
 
 		break;
 
 	case PARAM_TYPE_FLOAT:
 		if (!param_get(param, &ff)) {
-			PX4_INFO_RAW("%4.4f\n", (double)ff);
+			PARAM_PRINT("%4.4f\n", (double)ff);
 		}
 
 		break;
 
 	default:
-		PX4_INFO_RAW("<unknown type %d>\n", 0 + param_type(param));
+		PARAM_PRINT("<unknown type %d>\n", 0 + param_type(param));
 	}
 
 	return 0;
@@ -677,7 +684,7 @@ do_show_print(void *arg, param_t param)
 		}
 	}
 
-	PX4_INFO_RAW("%c %c %s [%d,%d] : ", (param_used(param) ? 'x' : ' '),
+	PARAM_PRINT("%c %c %s [%d,%d] : ", (param_used(param) ? 'x' : ' '),
 		    param_value_unsaved(param) ? '*' : (param_value_is_default(param) ? ' ' : '+'),
 		    param_name(param), param_get_used_index(param), param_get_index(param));
 
@@ -688,7 +695,7 @@ do_show_print(void *arg, param_t param)
 	switch (param_type(param)) {
 	case PARAM_TYPE_INT32:
 		if (!param_get(param, &i)) {
-			PX4_INFO_RAW("%ld\n", (long)i);
+			PARAM_PRINT("%ld\n", (long)i);
 			return;
 		}
 
@@ -696,18 +703,18 @@ do_show_print(void *arg, param_t param)
 
 	case PARAM_TYPE_FLOAT:
 		if (!param_get(param, &f)) {
-			PX4_INFO_RAW("%4.4f\n", (double)f);
+			PARAM_PRINT("%4.4f\n", (double)f);
 			return;
 		}
 
 		break;
 
 	default:
-		PX4_INFO_RAW("<unknown type %d>\n", 0 + param_type(param));
+		PARAM_PRINT("<unknown type %d>\n", 0 + param_type(param));
 		return;
 	}
 
-	PX4_INFO_RAW("<error fetching parameter %lu>\n", (unsigned long)param);
+	PARAM_PRINT("<error fetching parameter %lu>\n", (unsigned long)param);
 }
 
 static void
@@ -732,12 +739,12 @@ do_show_print_for_airframe(void *arg, param_t param)
 
 	int32_t i;
 	float f;
-	PX4_INFO_RAW("param set-default %s ", p_name);
+	PARAM_PRINT("param set-default %s ", p_name);
 
 	switch (param_type(param)) {
 	case PARAM_TYPE_INT32:
 		if (!param_get(param, &i)) {
-			PX4_INFO_RAW("%ld\n", (long)i);
+			PARAM_PRINT("%ld\n", (long)i);
 			return;
 		}
 
@@ -745,7 +752,7 @@ do_show_print_for_airframe(void *arg, param_t param)
 
 	case PARAM_TYPE_FLOAT:
 		if (!param_get(param, &f)) {
-			PX4_INFO_RAW("%4.4f\n", (double)f);
+			PARAM_PRINT("%4.4f\n", (double)f);
 			return;
 		}
 
@@ -755,7 +762,7 @@ do_show_print_for_airframe(void *arg, param_t param)
 		return;
 	}
 
-	PX4_INFO_RAW("<error fetching parameter %lu>\n", (unsigned long)param);
+	PARAM_PRINT("<error fetching parameter %lu>\n", (unsigned long)param);
 }
 
 static int
@@ -785,12 +792,12 @@ do_set(const char *name, const char *val, bool fail_on_not_found)
 			int32_t newval = strtol(val, &end, 10);
 
 			if (i != newval) {
-				PX4_INFO_RAW("%c %s: ",
+				PARAM_PRINT("%c %s: ",
 					    param_value_unsaved(param) ? '*' : (param_value_is_default(param) ? ' ' : '+'),
 					    param_name(param));
-				PX4_INFO_RAW("curr: %ld", (long)i);
+				PARAM_PRINT("curr: %ld", (long)i);
 				param_set(param, &newval);
-				PX4_INFO_RAW(" -> new: %ld\n", (long)newval);
+				PARAM_PRINT(" -> new: %ld\n", (long)newval);
 			}
 		}
 
@@ -807,12 +814,12 @@ do_set(const char *name, const char *val, bool fail_on_not_found)
 
 			if (f != newval) {
 #pragma GCC diagnostic pop
-				PX4_INFO_RAW("%c %s: ",
+				PARAM_PRINT("%c %s: ",
 					    param_value_unsaved(param) ? '*' : (param_value_is_default(param) ? ' ' : '+'),
 					    param_name(param));
-				PX4_INFO_RAW("curr: %4.4f", (double)f);
+				PARAM_PRINT("curr: %4.4f", (double)f);
 				param_set(param, &newval);
-				PX4_INFO_RAW(" -> new: %4.4f\n", (double)newval);
+				PARAM_PRINT(" -> new: %4.4f\n", (double)newval);
 			}
 
 		}

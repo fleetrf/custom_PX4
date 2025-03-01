@@ -230,10 +230,6 @@ float *DataValidatorGroup::get_best(uint64_t timestamp, int *index)
 				if (_first_failover_time == 0) {
 					_first_failover_time = timestamp;
 				}
-
-				if (max_confidence < FLT_EPSILON) {
-					max_index = -1;
-				}
 			}
 		}
 

@@ -3171,24 +3171,24 @@ MavlinkReceiver::run()
 
 						if(number_of_dead_msgs >=10){	//10 corresponds to a 2 second timer
 							// PX4_INFO("CC IS DEAD, LAND ASAP");
-							vehicle_command_s vcmd{};			//trigger land
-							vcmd.timestamp = hrt_absolute_time();
-							vcmd.param1 = 0.0f;
-							vcmd.param2 = 0.0f;
-							vcmd.param3 = 0.0f;
-							vcmd.param4 = 0.0f;
-							vcmd.param5 = 0.0f;
-							vcmd.param6 = 0.0f;
-							vcmd.param7 = NAN;
-							vcmd.command = MAV_CMD_NAV_LAND;
-							vcmd.target_system = mavlink_system.sysid;
-							vcmd.target_component = mavlink_system.compid;
-							vcmd.source_system = mavlink_system.sysid;
-							vcmd.source_component = mavlink_system.compid;
-							vcmd.from_external = true;
+							// vehicle_command_s vcmd{};			//trigger land
+							// vcmd.timestamp = hrt_absolute_time();
+							// vcmd.param1 = 0.0f;
+							// vcmd.param2 = 0.0f;
+							// vcmd.param3 = 0.0f;
+							// vcmd.param4 = 0.0f;
+							// vcmd.param5 = 0.0f;
+							// vcmd.param6 = 0.0f;
+							// vcmd.param7 = NAN;
+							// vcmd.command = MAV_CMD_NAV_LAND;
+							// vcmd.target_system = mavlink_system.sysid;
+							// vcmd.target_component = mavlink_system.compid;
+							// vcmd.source_system = mavlink_system.sysid;
+							// vcmd.source_component = mavlink_system.compid;
+							// vcmd.from_external = true;
 
-							uORB::Publication<vehicle_command_s> pub{ORB_ID(vehicle_command)};
-							pub.publish(vcmd);
+							// uORB::Publication<vehicle_command_s> pub{ORB_ID(vehicle_command)};
+							// pub.publish(vcmd);
 							//if we want only one messagge, then we have to do some status monitoring
 
 						}

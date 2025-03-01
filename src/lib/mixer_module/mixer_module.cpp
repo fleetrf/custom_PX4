@@ -64,11 +64,10 @@ static const FunctionProvider all_function_providers[] = {
 	{OutputFunction::Gripper, &FunctionGripper::allocate},
 	{OutputFunction::RC_Roll, OutputFunction::RC_AUXMax, &FunctionManualRC::allocate},
 	{OutputFunction::Gimbal_Roll, OutputFunction::Gimbal_Yaw, &FunctionGimbal::allocate},
-	{OutputFunction::IC_Engine_Ignition, OutputFunction::IC_Engine_Starter, &FunctionICEControl::allocate},
 };
 
 MixingOutput::MixingOutput(const char *param_prefix, uint8_t max_num_outputs, OutputModuleInterface &interface,
-			   SchedulingPolicy scheduling_policy, bool support_esc_calibration, bool ramp_up, const uint8_t instance_start) :
+			   SchedulingPolicy scheduling_policy, bool support_esc_calibration, bool ramp_up) :
 	ModuleParams(&interface),
 	_output_ramp_up(ramp_up),
 	_scheduling_policy(scheduling_policy),
@@ -88,7 +87,7 @@ MixingOutput::MixingOutput(const char *param_prefix, uint8_t max_num_outputs, Ou
 
 	px4_sem_init(&_lock, 0, 1);
 
-	initParamHandles(instance_start);
+	initParamHandles();
 
 	for (unsigned i = 0; i < MAX_ACTUATORS; i++) {
 		_failsafe_value[i] = UINT16_MAX;
@@ -109,20 +108,20 @@ MixingOutput::~MixingOutput()
 	_outputs_pub.unadvertise();
 }
 
-void MixingOutput::initParamHandles(const uint8_t instance_start)
+void MixingOutput::initParamHandles()
 {
 	char param_name[17];
 
 	for (unsigned i = 0; i < _max_num_outputs; ++i) {
-		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "FUNC", i + instance_start);
+		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "FUNC", i + 1);
 		_param_handles[i].function = param_find(param_name);
-		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "DIS", i + instance_start);
+		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "DIS", i + 1);
 		_param_handles[i].disarmed = param_find(param_name);
-		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "MIN", i + instance_start);
+		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "MIN", i + 1);
 		_param_handles[i].min = param_find(param_name);
-		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "MAX", i + instance_start);
+		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "MAX", i + 1);
 		_param_handles[i].max = param_find(param_name);
-		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "FAIL", i + instance_start);
+		snprintf(param_name, sizeof(param_name), "%s_%s%d", _param_prefix, "FAIL", i + 1);
 		_param_handles[i].failsafe = param_find(param_name);
 	}
 

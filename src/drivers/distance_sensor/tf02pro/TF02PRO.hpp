@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file TF02PRO.hpp
+ * @file TF02PRO.cpp
  *
  * Driver for the SRF02 sonar range finder adapted from the Maxbotix sonar range finder driver (srf02).
  */

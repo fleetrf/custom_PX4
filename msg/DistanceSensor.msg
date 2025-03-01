@@ -20,6 +20,8 @@ float32 h_fov # Sensor horizontal field of view (rad)
 float32 v_fov # Sensor vertical field of view (rad)
 float32[4] q # Quaterion sensor orientation with respect to the vehicle body frame to specify the orientation ROTATION_CUSTOM
 
+uint8 MAX_INSTANCES = 4
+
 uint8 orientation		# Direction the sensor faces from MAV_SENSOR_ORIENTATION enum
 
 uint8 ROTATION_YAW_0		= 0 # MAV_SENSOR_ROTATION_NONE
@@ -40,8 +42,3 @@ uint8 ROTATION_UPWARD_FACING   = 24 # MAV_SENSOR_ROTATION_PITCH_90
 uint8 ROTATION_DOWNWARD_FACING = 25 # MAV_SENSOR_ROTATION_PITCH_270
 
 uint8 ROTATION_CUSTOM          = 100 # MAV_SENSOR_ROTATION_CUSTOM
-
-uint8 mode
-uint8 MODE_UNKNOWN  = 0
-uint8 MODE_ENABLED  = 1
-uint8 MODE_DISABLED = 2

@@ -35,7 +35,7 @@
 
 HeadingSmoothing::HeadingSmoothing()
 {
-	_velocity_smoothing.setMaxVel(M_TWOPI_F); // "velocity" is heading. 2Pi limit is needed for correct angle wrapping
+	_velocity_smoothing.setMaxVel(M_PI_F); // smoothed "velocity" is heading [-pi, pi]
 }
 
 void HeadingSmoothing::reset(const float heading, const float heading_rate)

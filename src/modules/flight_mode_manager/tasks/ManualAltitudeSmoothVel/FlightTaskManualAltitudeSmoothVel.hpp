@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file FlightTaskManualAltitudeSmoothVel.hpp
+ * @file FlightManualAltitudeSmoothVel.hpp
  *
  * Flight task for manual controlled altitude using the velocity smoothing library
  */

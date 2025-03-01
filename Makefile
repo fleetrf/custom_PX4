@@ -324,13 +324,10 @@ px4io_update:
 	git status
 
 bootloaders_update: \
-	3dr_ctrl-zero-h7-oem-revg_bootloader \
 	ark_fmu-v6x_bootloader \
-	ark_fpv_bootloader \
 	ark_pi6x_bootloader \
 	cuav_nora_bootloader \
 	cuav_x7pro_bootloader \
-	cuav_7-nano_bootloader \
 	cubepilot_cubeorange_bootloader \
 	cubepilot_cubeorangeplus_bootloader \
 	hkust_nxt-dual_bootloader \
@@ -342,9 +339,6 @@ bootloaders_update: \
 	matek_h743_bootloader \
 	matek_h743-mini_bootloader \
 	matek_h743-slim_bootloader \
-        micoair_h743_bootloader \
-        micoair_h743-aio_bootloader \
-	micoair_h743-v2_bootloader \
 	modalai_fc-v2_bootloader \
 	mro_ctrl-zero-classic_bootloader \
 	mro_ctrl-zero-h7_bootloader \
@@ -385,9 +379,9 @@ doxygen:
 	@$(PX4_MAKE) -C "$(SRC_DIR)"/build/doxygen
 	@touch "$(SRC_DIR)"/build/doxygen/Documentation/.nojekyll
 
-# Style
+# Astyle
 # --------------------------------------------------------------------
-.PHONY: check_format format check_newlines
+.PHONY: check_format format
 
 check_format:
 	$(call colorecho,'Checking formatting with astyle')
@@ -398,13 +392,9 @@ format:
 	$(call colorecho,'Formatting with astyle')
 	@"$(SRC_DIR)"/Tools/astyle/check_code_style_all.sh --fix
 
-check_newlines:
-	$(call colorecho,'Checking for missing or duplicate newlines at the end of files')
-	@"$(SRC_DIR)"/Tools/astyle/check_newlines.sh
-
 # Testing
 # --------------------------------------------------------------------
-.PHONY: tests tests_coverage tests_mission tests_mission_coverage tests_offboard
+.PHONY: tests tests_coverage tests_mission tests_mission_coverage tests_offboard tests_avoidance
 .PHONY: rostest python_coverage
 
 tests:
@@ -456,6 +446,10 @@ tests_offboard: rostest
 	@"$(SRC_DIR)"/test/rostest_px4_run.sh mavros_posix_tests_offboard_attctl.test
 	@"$(SRC_DIR)"/test/rostest_px4_run.sh mavros_posix_tests_offboard_posctl.test
 	@"$(SRC_DIR)"/test/rostest_px4_run.sh mavros_posix_tests_offboard_rpyrt_ctl.test
+
+tests_avoidance: rostest
+	@"$(SRC_DIR)"/test/rostest_avoidance_run.sh mavros_posix_test_avoidance.test
+	@"$(SRC_DIR)"/test/rostest_avoidance_run.sh mavros_posix_test_safe_landing.test
 
 python_coverage:
 	@mkdir -p "$(SRC_DIR)"/build/python_coverage
@@ -551,14 +545,14 @@ distclean:
 # All other targets are handled by PX4_MAKE. Add a rule here to avoid printing an error.
 %:
 	$(if $(filter $(FIRST_ARG),$@), \
-		$(error "Make target $@ not found. It either does not exist or $@ cannot be the first argument. Use '$(MAKE) list_config_targets' to get a list of all possible [configuration] targets."),@#)
+		$(error "Make target $@ not found. It either does not exist or $@ cannot be the first argument. Use '$(MAKE) help|list_config_targets' to get a list of all possible [configuration] targets."),@#)
 
 # Print a list of non-config targets (based on http://stackoverflow.com/a/26339924/1487069)
 help:
 	@echo "Usage: $(MAKE) <target>"
 	@echo "Where <target> is one of:"
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | \
-		awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | \
+		awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | \
 		egrep -v -e '^[^[:alnum:]]' -e '^($(subst $(space),|,$(ALL_CONFIG_TARGETS)))$$' -e '_default$$' -e '^(Makefile)'
 	@echo
 	@echo "Or, $(MAKE) <config_target> [<make_target(s)>]"

@@ -113,19 +113,11 @@ include(px4_parse_function_args)
 include(px4_git)
 
 execute_process(
-	COMMAND git describe --exclude ext/* --tags --match "v[0-9]*"
+	COMMAND git describe --exclude ext/* --always --tags
 	OUTPUT_VARIABLE PX4_GIT_TAG
 	OUTPUT_STRIP_TRAILING_WHITESPACE
-	RESULTS_VARIABLE GIT_DESCRIBE_RESULT
 	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
 	)
-
-# if proper git tag unavilable default to v0.0.0
-if(NOT ${GIT_DESCRIBE_RESULT} MATCHES "0")
-	set(PX4_GIT_TAG "v0.0.0")
-endif()
-
-message(STATUS "PX4_GIT_TAG: ${PX4_GIT_TAG}")
 
 # git describe to X.Y.Z version
 string(REPLACE "." ";" VERSION_LIST ${PX4_GIT_TAG})
@@ -408,15 +400,8 @@ include(px4_add_gtest)
 if(BUILD_TESTING)
 	include(gtest)
 
-	# Ensure there's no -R without any filter expression since that trips newer ctest versions
-	if(TESTFILTER)
-		set(TESTFILTERARG "-R")
-	else()
-		set(TESTFILTERARG "")
-	endif()
-
 	add_custom_target(test_results
-			COMMAND GTEST_COLOR=1 ${CMAKE_CTEST_COMMAND} --output-on-failure -T Test ${TESTFILTERARG} ${TESTFILTER}
+			COMMAND GTEST_COLOR=1 ${CMAKE_CTEST_COMMAND} --output-on-failure -T Test -R ${TESTFILTER} USES_TERMINAL
 			DEPENDS
 				px4
 				examples__dyn_hello

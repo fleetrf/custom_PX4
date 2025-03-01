@@ -473,3 +473,4 @@ ArchPX4IOSerial::_abort_dma()
 	stm32_dmastop(_tx_dma);
 	stm32_dmastop(_rx_dma);
 }
+

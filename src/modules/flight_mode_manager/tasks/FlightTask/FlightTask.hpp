@@ -52,8 +52,17 @@
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_constraints.h>
 #include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_trajectory_waypoint.h>
 #include <uORB/topics/home_position.h>
 #include <lib/geo/geo.h>
+
+struct ekf_reset_counters_s {
+	uint8_t xy;
+	uint8_t vxy;
+	uint8_t z;
+	uint8_t vz;
+	uint8_t heading;
+};
 
 class FlightTask : public ModuleParams
 {
@@ -78,8 +87,6 @@ public:
 	 * Call this to reset an active Flight Task
 	 */
 	virtual void reActivate();
-
-	virtual void initEkfResetCounters();
 
 	/**
 	 * To be called to adopt parameters from an arrived vehicle command
@@ -108,6 +115,9 @@ public:
 	 */
 	const trajectory_setpoint_s getTrajectorySetpoint();
 
+	const ekf_reset_counters_s getResetCounters() const { return _reset_counters; }
+	void setResetCounters(const ekf_reset_counters_s &counters) { _reset_counters = counters; }
+
 	/**
 	 * Get vehicle constraints.
 	 * The constraints can vary with task.
@@ -121,6 +131,12 @@ public:
 	 * @return landing gear
 	 */
 	const landing_gear_s &getGear() { return _gear; }
+
+	/**
+	 * Get avoidance desired waypoint
+	 * @return desired waypoints
+	 */
+	const vehicle_trajectory_waypoint_s &getAvoidanceWaypoint() { return _desired_waypoint; }
 
 	/**
 	 * All setpoints are set to NAN (uncontrolled), timestamp to zero
@@ -182,7 +198,6 @@ protected:
 	virtual void _ekfResetHandlerPositionXY(const matrix::Vector2f &delta_xy) {};
 	virtual void _ekfResetHandlerVelocityXY(const matrix::Vector2f &delta_vxy) {};
 	virtual void _ekfResetHandlerPositionZ(float delta_z) {};
-	virtual void _ekfResetHandlerHagl(float delta_hagl) {};
 	virtual void _ekfResetHandlerVelocityZ(float delta_vz) {};
 	virtual void _ekfResetHandlerHeading(float delta_psi) {};
 
@@ -226,14 +241,7 @@ protected:
 	float _yaw_setpoint{};
 	float _yawspeed_setpoint{};
 
-	struct ekf_reset_counters_s {
-		uint8_t xy;
-		uint8_t vxy;
-		uint8_t z;
-		uint8_t vz;
-		uint8_t heading;
-		uint8_t hagl;
-	} _reset_counters{}; ///< Counters for estimator local position resets
+	ekf_reset_counters_s _reset_counters{}; ///< Counters for estimator local position resets
 
 	/**
 	 * Vehicle constraints.
@@ -242,6 +250,12 @@ protected:
 	vehicle_constraints_s _constraints{};
 
 	landing_gear_s _gear{};
+
+	/**
+	 * Desired waypoints.
+	 * Goals set by the FCU to be sent to the obstacle avoidance system.
+	 */
+	vehicle_trajectory_waypoint_s _desired_waypoint{};
 
 	DEFINE_PARAMETERS_CUSTOM_PARENT(ModuleParams,
 					(ParamFloat<px4::params::MPC_XY_VEL_MAX>) _param_mpc_xy_vel_max,

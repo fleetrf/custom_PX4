@@ -137,7 +137,7 @@ div.frame_variant td, div.frame_variant th {
                             #print(output_name,value, attribstrs[0].strip(),attribstrs[1].strip())
                     outputs += '</ul>'
                     if has_outputs:
-                        outputs_entry = '<br><b>Specific Outputs:</b>' + outputs
+                        outputs_entry = '<p><b>Specific Outputs:</b>' + outputs + '</p>'
                     else:
                         outputs_entry = ''
 

@@ -37,11 +37,10 @@
  */
 
 // includes for mathematical manipulation
-#include <drivers/drv_hrt.h>
-#include <lib/geo/geo.h>
-#include <lib/mathlib/mathlib.h>
-#include <lib/modes/ui.hpp>
+#include <math.h>
 #include <matrix/math.hpp>
+#include <lib/geo/geo.h>
+#include <lib/modes/ui.hpp>
 
 // clock access
 #include <px4_platform_common/defines.h>

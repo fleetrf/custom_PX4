@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file ft7_technologies.hpp
+ * @file ft7_technolofies.hpp
  * @author Henry Kotze <henry@flycloudline.com>
  *
  * Driver for the FT Technology Wind Sensor. FT742

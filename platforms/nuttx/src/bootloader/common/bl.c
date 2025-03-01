@@ -153,7 +153,6 @@
 #define STATE_ALLOWS_REBOOT       (STATE_ALLOWS_ERASE|STATE_PROTO_PROG_MULTI|STATE_PROTO_GET_CRC)
 #  define SET_BL_STATE(s) bl_state |= (s)
 #endif
-#define STATE_ALLOWS_BOOTLOADER   (STATE_PROTO_GET_SYNC|STATE_PROTO_GET_DEVICE)
 
 static uint8_t bl_type;
 static uint8_t last_input;
@@ -1108,10 +1107,9 @@ bootloader(unsigned timeout)
 			continue;
 		}
 
-		// We got a sync command as well as a get_device command, we are very likely talking to the uploader.
-		if ((bl_state & STATE_ALLOWS_BOOTLOADER) == STATE_ALLOWS_BOOTLOADER) {
-			timeout = 0;
-		}
+		// we got a command worth syncing, so kill the timeout because
+		// we are probably talking to the uploader
+		timeout = 0;
 
 		// Set the bootloader port based on the port from which we received the first valid command
 		if (bl_type == NONE) {

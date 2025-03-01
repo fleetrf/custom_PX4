@@ -60,3 +60,4 @@ static inline void hrt_work_unlock(void)
 }
 
 __END_DECLS
+

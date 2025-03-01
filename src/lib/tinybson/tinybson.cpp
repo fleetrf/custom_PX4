@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file tinybson.cpp
+ * @file tinybson.c
  *
  * A simple subset SAX-style BSON parser and generator.
  */

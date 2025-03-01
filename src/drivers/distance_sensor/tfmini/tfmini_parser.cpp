@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file tfmini_parser.cpp
+ * @file modified from sf0x_parser.cpp
  * @author Lorenz Meier <lm@inf.ethz.ch>
  * @author Chuong Nguyen <chnguye7@asu.edu>
  * @author Ayush Gaud <ayush.gaud@gmail.com>

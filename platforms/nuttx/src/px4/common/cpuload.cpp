@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file cpuload.cpp
+ * @file cpuload.c
  *
  * Measurement of CPU load of each individual task.
  *

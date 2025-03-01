@@ -76,3 +76,4 @@ private:
 	std::atomic_int _components_used_bitset{0};
 	std::atomic_int _components_progress_bitset{0};
 };
+

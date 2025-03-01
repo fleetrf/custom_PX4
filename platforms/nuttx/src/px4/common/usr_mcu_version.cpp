@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /**
- * @file usr_mcu_version.cpp
+ * @file usr_mcu_version.c
  * Implementation of generic user-space version API
  */
 
@@ -114,3 +114,4 @@ int board_get_px4_guid_formated(char *format_buffer, int size)
 
 	return offset;
 }
+

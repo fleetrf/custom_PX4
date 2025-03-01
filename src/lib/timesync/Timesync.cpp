@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file Timesync.cpp
+ * @file timesync.cpp
  * timesync implementation.
  *
  * @author Mohammed Kabir <mhkabir98@gmail.com>

@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 /**
- * @file LaunchDetector.cpp
+ * @file launchDetection.cpp
  * Auto launch detection for catapult/hand-launch vehicles
  *
  * @author Thomas Gubler <thomasgubler@gmail.com>
