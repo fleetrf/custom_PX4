@@ -476,6 +476,10 @@ int GPS::pollOrRead(uint8_t *buf, size_t buf_length, int timeout)
 	if (_interface == GPSHelper::Interface::UART) {
 		ret = _uart.readAtLeast(buf, buf_length, math::min(character_count, buf_length), timeout_adjusted);
 
+		if (ret > 0) {
+			_num_bytes_read += ret;
+		}
+
 // SPI is only supported on LInux
 #if defined(__PX4_LINUX)
 
@@ -543,8 +547,13 @@ void GPS::handleInjectDataTopic()
 		for (int instance = 0; instance < _orb_inject_data_sub.size(); instance++) {
 			const bool exists = _orb_inject_data_sub[instance].advertised();
 
-			if (exists) {
-				if (_orb_inject_data_sub[instance].copy(&msg)) {
+			if (exists && _orb_inject_data_sub[instance].copy(&msg)) {
+				/* Don't select the own RTCM instance. In case it has a lower
+				 * instance number, it will be selected and will be rejected
+				 * later in the code, resulting in no RTCM injection at all.
+				 */
+				if (msg.device_id != get_device_id()) {
+					// Only use the message if it is up to date
 					if ((hrt_absolute_time() - msg.timestamp) < 5_s) {
 						// Remember that we already did a copy on this instance.
 						already_copied = true;
@@ -934,7 +943,8 @@ GPS::run()
 						set_device_type(DRV_GPS_DEVTYPE_UBX_9);
 						break;
 
-					case GPSDriverUBX::Board::u_blox9_F9P:
+					case GPSDriverUBX::Board::u_blox9_F9P_L1L2:
+					case GPSDriverUBX::Board::u_blox9_F9P_L1L5:
 						set_device_type(DRV_GPS_DEVTYPE_UBX_F9P);
 						break;
 
@@ -1213,10 +1223,12 @@ GPS::publish()
 void
 GPS::publishSatelliteInfo()
 {
-	if (_instance == Instance::Main) {
+	if (_instance == Instance::Main || _is_gps_main_advertised.load()) {
 		if (_p_report_sat_info != nullptr) {
 			_report_sat_info_pub.publish(*_p_report_sat_info);
 		}
+
+		_is_gps_main_advertised.store(true);
 
 	} else {
 		//we don't publish satellite info for the secondary gps
