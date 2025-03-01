@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file BlockLowPass.cpp
+ * @file blocks.cpp
  *
  * Controller library code
  */

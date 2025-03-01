@@ -149,12 +149,11 @@ PARAM_DEFINE_INT32(ASPD_PRIMARY, 1);
  * Controls which checks are run to check airspeed data for validity. Only applied if ASPD_PRIMARY > 0.
  *
  * @min 0
- * @max 31
+ * @max 15
  * @bit 0 Only data missing check (triggers if more than 1s no data)
  * @bit 1 Data stuck (triggers if data is exactly constant for 2s in FW mode)
  * @bit 2 Innovation check (see ASPD_FS_INNOV)
  * @bit 3 Load factor check (triggers if measurement is below stall speed)
- * @bit 4 First principle check (airspeed change vs. throttle and pitch)
  * @group Airspeed Validator
  */
 PARAM_DEFINE_INT32(ASPD_DO_CHECKS, 7);
@@ -209,10 +208,10 @@ PARAM_DEFINE_FLOAT(ASPD_FS_INTEG, 10.f);
  *
  * @unit s
  * @group Airspeed Validator
- * @min 0.0
- * @decimal 1
+ * @min 1
+ * @max 10
  */
-PARAM_DEFINE_FLOAT(ASPD_FS_T_STOP, 1.f);
+PARAM_DEFINE_INT32(ASPD_FS_T_STOP, 2);
 
 /**
  * Airspeed failsafe start delay
@@ -222,10 +221,10 @@ PARAM_DEFINE_FLOAT(ASPD_FS_T_STOP, 1.f);
  *
  * @unit s
  * @group Airspeed Validator
- * @min -1.0
- * @decimal 1
+ * @min -1
+ * @max 1000
  */
-PARAM_DEFINE_FLOAT(ASPD_FS_T_START, -1.f);
+PARAM_DEFINE_INT32(ASPD_FS_T_START, -1);
 
 /**
  * Horizontal wind uncertainty threshold for synthetic airspeed.
@@ -240,19 +239,3 @@ PARAM_DEFINE_FLOAT(ASPD_FS_T_START, -1.f);
  * @group Airspeed Validator
  */
 PARAM_DEFINE_FLOAT(ASPD_WERR_THR, 0.55f);
-
-/**
- * First principle airspeed check time window
- *
- * Window for comparing airspeed change to throttle and pitch change.
- * Triggers when the airspeed change within this window is negative while throttle increases
- * and the vehicle pitches down.
- * Is meant to catch degrading airspeed blockages as can happen when flying through icing conditions.
- * Relies on  FW_THR_TRIM being set accurately.
- *
- * @unit s
- * @min 0
- * @decimal 1
- * @group Airspeed Validator
- */
-PARAM_DEFINE_FLOAT(ASPD_FP_T_WINDOW, 2.0f);

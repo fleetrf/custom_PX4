@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file perf_counter.cpp
+ * @file perf_counter.c
  *
  * @brief Performance measuring tools.
  */

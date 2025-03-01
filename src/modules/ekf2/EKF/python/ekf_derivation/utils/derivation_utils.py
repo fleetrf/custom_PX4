@@ -56,7 +56,7 @@ def generate_px4_function(function_name, output_names):
     codegen = Codegen.function(
             function_name,
             output_names=output_names,
-            config=CppConfig(zero_initialization_sparsity_threshold=1))
+            config=CppConfig())
     metadata = codegen.generate_function(
             output_dir="generated",
             skip_directory_nesting=True)
@@ -91,21 +91,20 @@ def generate_python_function(function_name, output_names):
 def build_state_struct(state, T="float"):
     out = "struct StateSample {\n"
 
-    def get_px4_type(obj):
-        if isinstance(obj, sf.M11):
+    def TypeFromLength(len):
+        if len == 1:
             return f"{T}"
-        elif isinstance(obj, sf.M21):
+        elif len == 2:
             return f"matrix::Vector2<{T}>"
-        elif isinstance(obj, sf.M31):
+        elif len == 3:
             return f"matrix::Vector3<{T}>"
-        elif isinstance(obj, sf.Rot3):
+        elif len == 4:
             return f"matrix::Quaternion<{T}>"
         else:
-            print(f"unknown type {type(obj)}")
             raise NotImplementedError
 
     for key, val in state.items():
-        out += f"\t{get_px4_type(val)} {key}{{}};\n"
+        out += f"\t{TypeFromLength(val.storage_dim())} {key}{{}};\n"
 
     state_size = state.storage_dim()
     out += f"\n\tmatrix::Vector<{T}, {state_size}> Data() const {{\n" \

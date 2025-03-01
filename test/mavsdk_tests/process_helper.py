@@ -155,12 +155,10 @@ class Px4Runner(Runner):
                  debugger: str, verbose: bool, build_dir: str):
         super().__init__(log_dir, model, case, verbose)
         self.name = "px4"
+        self.cmd = os.path.join(workspace_dir, build_dir, "bin/px4")
         self.cwd = os.path.join(workspace_dir, build_dir,
                                 "tmp_mavsdk_tests/rootfs")
-        self.cmd = "nice"
         self.args = [
-                "--20",
-                os.path.join(workspace_dir, build_dir, "bin/px4"),
                 os.path.join(workspace_dir, build_dir, "etc"),
                 "-s",
                 "etc/init.d-posix/rcS",
@@ -331,10 +329,8 @@ class GzclientRunner(Runner):
         self.env = dict(os.environ, **{
             "GAZEBO_MODEL_PATH":
                 os.path.join(workspace_dir, PX4_GAZEBO_MODELS)})
-        self.cmd = "nice"
-        self.args = ["--19",
-                     "gzclient",
-                     "--verbose"]
+        self.cmd = "gzclient"
+        self.args = ["--verbose"]
 
 
 class TestRunner(Runner):
@@ -351,7 +347,7 @@ class TestRunner(Runner):
         self.name = "mavsdk_tests"
         self.cwd = workspace_dir
         self.cmd = "nice"
-        self.args = ["--18",
+        self.args = ["-5",
                      os.path.join(
                          workspace_dir,
                          build_dir,

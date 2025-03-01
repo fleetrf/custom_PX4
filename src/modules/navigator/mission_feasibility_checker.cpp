@@ -41,6 +41,7 @@
  */
 
 #include "mission_feasibility_checker.h"
+#include "MissionFeasibility/FeasibilityChecker.hpp"
 
 #include "mission_block.h"
 #include "navigator.h"

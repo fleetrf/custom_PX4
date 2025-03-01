@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file sht3x.cpp
+ * @file sht3x.c
  *
  * I2C driver for temperature/humidity sensor SHT3x by senserion
  *

@@ -42,8 +42,9 @@
 #include "zenoh_publisher.hpp"
 
 
-Zenoh_Publisher::Zenoh_Publisher()
+Zenoh_Publisher::Zenoh_Publisher(bool rostopic)
 {
+	this->_rostopic = rostopic;
 	this->_topic[0] = 0x0;
 }
 
@@ -58,17 +59,23 @@ int Zenoh_Publisher::undeclare_publisher()
 	return 0;
 }
 
-int Zenoh_Publisher::declare_publisher(z_owned_session_t s, const char *keyexpr)
+int Zenoh_Publisher::declare_publisher(z_session_t s, const char *keyexpr)
 {
-	strncpy(this->_topic, keyexpr, sizeof(this->_topic));
+	if (_rostopic) {
+		strncpy(this->_topic, (char *)_rt_prefix, _rt_prefix_offset);
 
-	z_view_keyexpr_t ke;
-	z_view_keyexpr_from_str(&ke, this->_topic);
+		if (keyexpr[0] == '/') {
+			strncpy(this->_topic + _rt_prefix_offset, keyexpr + 1, sizeof(this->_topic) - _rt_prefix_offset);
 
-	if (z_declare_publisher(&_pub, z_loan(s), z_loan(ke), NULL) < 0) {
-		printf("Unable to declare publisher for key expression!\n");
-		return -1;
+		} else {
+			strncpy(this->_topic + _rt_prefix_offset, keyexpr, sizeof(this->_topic) - _rt_prefix_offset);
+		}
+
+	} else {
+		strncpy(this->_topic, keyexpr, sizeof(this->_topic));
 	}
+
+	_pub = z_declare_publisher(s, z_keyexpr(this->_topic), NULL);
 
 	if (!z_publisher_check(&_pub)) {
 		printf("Unable to declare publisher for key expression!\n");
@@ -80,13 +87,9 @@ int Zenoh_Publisher::declare_publisher(z_owned_session_t s, const char *keyexpr)
 
 int8_t Zenoh_Publisher::publish(const uint8_t *buf, int size)
 {
-	z_publisher_put_options_t options;
-	z_publisher_put_options_default(&options);
-	options.encoding = NULL;
-
-	z_owned_bytes_t payload;
-	z_bytes_serialize_from_slice(&payload, buf, size);
-	return z_publisher_put(z_loan(_pub), z_move(payload), &options);
+	z_publisher_put_options_t options = z_publisher_put_options_default();
+	options.encoding = z_encoding(Z_ENCODING_PREFIX_APP_CUSTOM, NULL);
+	return z_publisher_put(z_publisher_loan(&_pub), buf, size, &options);
 }
 
 void Zenoh_Publisher::print()

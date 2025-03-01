@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /**
- * @file airspeed.cpp
+ * @file airspeed.c
  * Airspeed estimation
  *
  * @author Lorenz Meier <lm@inf.ethz.ch>

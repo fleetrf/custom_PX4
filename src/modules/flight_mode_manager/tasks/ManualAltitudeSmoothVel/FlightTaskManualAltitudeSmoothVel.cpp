@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file FlightTaskManualAltitudeSmoothVel.cpp
+ * @file FlightManualAltitude.cpp
  */
 
 #include "FlightTaskManualAltitudeSmoothVel.hpp"

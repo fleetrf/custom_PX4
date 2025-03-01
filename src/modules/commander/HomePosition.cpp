@@ -34,8 +34,6 @@
 
 #include "HomePosition.hpp"
 
-#include <math.h>
-
 #include <lib/geo/geo.h>
 #include "commander_helper.h"
 
@@ -85,8 +83,7 @@ bool HomePosition::hasMovedFromCurrentHomeLocation()
 		}
 	}
 
-	return (home_dist_xy > fmaxf(eph * 2.f, kMinHomePositionChangeEPH))
-	       || (home_dist_z > fmaxf(epv * 2.f, kMinHomePositionChangeEPV));
+	return (home_dist_xy > eph * 2.f) || (home_dist_z > epv * 2.f);
 }
 
 bool HomePosition::setHomePosition(bool force)
@@ -170,7 +167,7 @@ void HomePosition::fillGlobalHomePos(home_position_s &home, double lat, double l
 
 void HomePosition::setInAirHomePosition()
 {
-	home_position_s &home = _home_position_pub.get();
+	auto &home = _home_position_pub.get();
 
 	if (home.manual_home || (home.valid_lpos && home.valid_hpos && home.valid_alt)) {
 		return;
@@ -251,13 +248,13 @@ void HomePosition::setInAirHomePosition()
 
 bool HomePosition::setManually(double lat, double lon, float alt, float yaw)
 {
-	const vehicle_local_position_s &vehicle_local_position = _local_position_sub.get();
+	const auto &vehicle_local_position = _local_position_sub.get();
 
 	if (!vehicle_local_position.xy_global || !vehicle_local_position.z_global) {
 		return false;
 	}
 
-	home_position_s &home = _home_position_pub.get();
+	auto &home = _home_position_pub.get();
 	home.manual_home = true;
 
 	home.lat = lat;
@@ -328,7 +325,7 @@ void HomePosition::update(bool set_automatically, bool check_if_changed)
 	}
 
 	const vehicle_local_position_s &lpos = _local_position_sub.get();
-	const home_position_s &home = _home_position_pub.get();
+	const auto &home = _home_position_pub.get();
 
 	if (lpos.heading_reset_counter != _heading_reset_counter) {
 		if (_valid && set_automatically) {

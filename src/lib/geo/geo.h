@@ -48,6 +48,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <drivers/drv_hrt.h>
+
 #include <lib/mathlib/mathlib.h>
 #include <lib/matrix/matrix/math.hpp>
 
@@ -169,7 +171,15 @@ public:
 	/**
 	 * @brief Construct and initialize a new Map Projection object
 	 */
-	MapProjection(double lat_0, double lon_0, uint64_t timestamp = 0)
+	MapProjection(double lat_0, double lon_0)
+	{
+		initReference(lat_0, lon_0);
+	}
+
+	/**
+	 * @brief Construct and initialize a new Map Projection object
+	 */
+	MapProjection(double lat_0, double lon_0, uint64_t timestamp)
 	{
 		initReference(lat_0, lon_0, timestamp);
 	}
@@ -182,7 +192,20 @@ public:
 	 * @param lat in degrees (47.1234567°, not 471234567°)
 	 * @param lon in degrees (8.1234567°, not 81234567°)
 	 */
-	void initReference(double lat_0, double lon_0, uint64_t timestamp = 0);
+	void initReference(double lat_0, double lon_0, uint64_t timestamp);
+
+	/**
+	 * Initialize the map transformation
+	 *
+	 * with reference coordinates on the geographic coordinate system
+	 * where the azimuthal equidistant plane's origin is located
+	 * @param lat in degrees (47.1234567°, not 471234567°)
+	 * @param lon in degrees (8.1234567°, not 81234567°)
+	 */
+	inline void initReference(double lat_0, double lon_0)
+	{
+		initReference(lat_0, lon_0, hrt_absolute_time());
+	}
 
 	/**
 	 * @return true, if the map reference has been initialized before

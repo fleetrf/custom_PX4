@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file UavcanNode.hpp
+ * @file uavcan_main.hpp
  *
  * Defines basic functionality of UAVCAN node.
  *

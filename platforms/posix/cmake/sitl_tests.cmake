@@ -5,6 +5,7 @@
 # tests command arguments
 set(tests
 	atomic_bitset
+	bezier
 	bitset
 	bson
 	dataman

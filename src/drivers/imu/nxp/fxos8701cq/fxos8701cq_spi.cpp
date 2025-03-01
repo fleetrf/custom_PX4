@@ -213,3 +213,4 @@ int FXOS8701CQ_SPI::write(unsigned reg, void *data, unsigned count)
 
 	return transfer(cmd, nullptr, sizeof(cmd));
 }
+

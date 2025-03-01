@@ -68,21 +68,17 @@ matrix::Vector3f AttitudeControl::update(const Quatf &q) const
 		qd_red = qd;
 
 	} else {
-		// Transform rotation from current to desired thrust vector into a world frame reduced desired attitude.
-		// This is a right multiplication as the tilt error quaternion is obtained from two Z vectors expressed in the world frame.
+		// transform rotation from current to desired thrust vector into a world frame reduced desired attitude
 		qd_red *= q;
 	}
 
-	// With a full desired attitude given by: qd = qd_red * qd_dyaw, extract the delta yaw component.
-	// By definition, the delta yaw quaternion has the form (cos(angle/2), 0, 0, sin(angle/2))
-	Quatf qd_dyaw = qd_red.inversed() * qd;
-	qd_dyaw.canonicalize();
+	// mix full and reduced desired attitude
+	Quatf q_mix = qd_red.inversed() * qd;
+	q_mix.canonicalize();
 	// catch numerical problems with the domain of acosf and asinf
-	qd_dyaw(0) = math::constrain(qd_dyaw(0), -1.f, 1.f);
-	qd_dyaw(3) = math::constrain(qd_dyaw(3), -1.f, 1.f);
-
-	// scale the delta yaw angle and re-combine the desired attitude
-	qd = qd_red * Quatf(cosf(_yaw_w * acosf(qd_dyaw(0))), 0.f, 0.f, sinf(_yaw_w * asinf(qd_dyaw(3))));
+	q_mix(0) = math::constrain(q_mix(0), -1.f, 1.f);
+	q_mix(3) = math::constrain(q_mix(3), -1.f, 1.f);
+	qd = qd_red * Quatf(cosf(_yaw_w * acosf(q_mix(0))), 0, 0, sinf(_yaw_w * asinf(q_mix(3))));
 
 	// quaternion attitude control law, qe is rotation from q to qd
 	const Quatf qe = q.inversed() * qd;

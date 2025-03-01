@@ -51,7 +51,7 @@ class uORB_Zenoh_Publisher : public Zenoh_Publisher
 {
 public:
 	uORB_Zenoh_Publisher(const orb_metadata *meta, const uint32_t *ops) :
-		Zenoh_Publisher(),
+		Zenoh_Publisher(true),
 		_uorb_meta{meta},
 		_cdr_ops(ops)
 	{

@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file uorb_subscriber.hpp
+ * @file uorb_template.hpp
  *
 * Defines generic, templatized uORB over UAVCANv1 publisher
  *

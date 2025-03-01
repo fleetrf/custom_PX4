@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file mc_autotune_attitude_control_params.c
+ * @file autotune_attitude_control_params.c
  *
  * Parameters used by the attitude auto-tuner
  *

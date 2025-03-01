@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file mavlink_log.cpp
+ * @file mavlink_log.c
  * MAVLink text logging.
  *
  * @author Lorenz Meier <lorenz@px4.io>

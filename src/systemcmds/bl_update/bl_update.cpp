@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file bl_update.cpp
+ * @file bl_update.c
  *
  * STM32F4 & STM32F7 bootloader update tool.
  */

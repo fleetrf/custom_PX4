@@ -39,3 +39,4 @@
  * @group UAVCAN
  */
 PARAM_DEFINE_INT32(SIM_GZ_EN, 0);
+

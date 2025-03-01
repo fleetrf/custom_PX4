@@ -123,7 +123,7 @@ TEST_F(EkfBasicsTest, initialControlMode)
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().mag_fault);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().gnd_effect);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().rng_stuck);
-	EXPECT_EQ(0, (int) _ekf->control_status_flags().gnss_yaw);
+	EXPECT_EQ(0, (int) _ekf->control_status_flags().gps_yaw);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().mag_aligned_in_flight);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().ev_vel);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().synthetic_mag_z);
@@ -178,7 +178,7 @@ TEST_F(EkfBasicsTest, gpsFusion)
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().mag_fault);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().gnd_effect);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().rng_stuck);
-	EXPECT_EQ(0, (int) _ekf->control_status_flags().gnss_yaw);
+	EXPECT_EQ(0, (int) _ekf->control_status_flags().gps_yaw);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().mag_aligned_in_flight);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().ev_vel);
 	EXPECT_EQ(0, (int) _ekf->control_status_flags().synthetic_mag_z);
@@ -219,22 +219,19 @@ TEST_F(EkfBasicsTest, reset_ekf_global_origin_gps_initialized)
 	_altitude_new  = 100.0;
 
 	_sensor_simulator.startGps();
-	_ekf_wrapper.enableGpsHeightFusion();
+	_ekf->set_min_required_gps_health_time(1e6);
+	_sensor_simulator.runSeconds(1);
 
 	_sensor_simulator.setGpsLatitude(_latitude_new);
 	_sensor_simulator.setGpsLongitude(_longitude_new);
 	_sensor_simulator.setGpsAltitude(_altitude_new);
-	_ekf->set_min_required_gps_health_time(1e6);
-	_sensor_simulator.runSeconds(1);
 	_sensor_simulator.runSeconds(5);
 
 	_ekf->getEkfGlobalOrigin(_origin_time, _latitude, _longitude, _altitude);
 
 	EXPECT_DOUBLE_EQ(_latitude, _latitude_new);
 	EXPECT_DOUBLE_EQ(_longitude, _longitude_new);
-
-	// In baro height ref the origin is set using baro data and not GNSS altitude
-	EXPECT_NEAR(_altitude, _sensor_simulator._baro.getData(), 0.01f);
+	EXPECT_NEAR(_altitude, _altitude_new, 0.01f);
 
 	// Note: we cannot reset too far since the local position is limited to 1e6m
 	_latitude_new  = 14.0000005;
@@ -264,13 +261,11 @@ TEST_F(EkfBasicsTest, reset_ekf_global_origin_gps_initialized)
 
 TEST_F(EkfBasicsTest, reset_ekf_global_origin_gps_uninitialized)
 {
-	_ekf->getEkfGlobalOrigin(_origin_time, _latitude, _longitude, _altitude);
+	_ekf->getEkfGlobalOrigin(_origin_time, _latitude_new, _longitude_new, _altitude_new);
 
 	EXPECT_DOUBLE_EQ(_latitude, _latitude_new);
 	EXPECT_DOUBLE_EQ(_longitude, _longitude_new);
-
-	// In baro height ref the origin is set using baro data and not GNSS altitude
-	EXPECT_NEAR(_altitude, _sensor_simulator._baro.getData(), 0.01f);
+	EXPECT_FLOAT_EQ(_altitude, _altitude_new);
 
 	EXPECT_FALSE(_ekf->global_origin_valid());
 
@@ -288,7 +283,7 @@ TEST_F(EkfBasicsTest, reset_ekf_global_origin_gps_uninitialized)
 	// Global origin has been initialized but since there is no position aiding, the global
 	// position is still not valid
 	EXPECT_TRUE(_ekf->global_origin_valid());
-	EXPECT_FALSE(_ekf->isGlobalHorizontalPositionValid());
+	EXPECT_FALSE(_ekf->global_position_is_valid());
 
 	_sensor_simulator.runSeconds(1);
 
@@ -312,9 +307,9 @@ TEST_F(EkfBasicsTest, global_position_from_local_ev)
 	_sensor_simulator.runSeconds(1);
 
 	// THEN; since there is no origin, only the local position can be valid
-	EXPECT_TRUE(_ekf->isLocalHorizontalPositionValid());
+	EXPECT_TRUE(_ekf->local_position_is_valid());
 	EXPECT_FALSE(_ekf->global_origin_valid());
-	EXPECT_FALSE(_ekf->isGlobalHorizontalPositionValid());
+	EXPECT_FALSE(_ekf->global_position_is_valid());
 
 	_latitude_new  = 45.0000005;
 	_longitude_new = 111.0000005;
@@ -325,8 +320,8 @@ TEST_F(EkfBasicsTest, global_position_from_local_ev)
 
 	// THEN: local and global positions are valid
 	EXPECT_TRUE(_ekf->global_origin_valid());
-	EXPECT_TRUE(_ekf->isGlobalHorizontalPositionValid());
-	EXPECT_TRUE(_ekf->isLocalHorizontalPositionValid());
+	EXPECT_TRUE(_ekf->global_position_is_valid());
+	EXPECT_TRUE(_ekf->local_position_is_valid());
 }
 
 TEST_F(EkfBasicsTest, global_position_from_opt_flow)
@@ -343,9 +338,9 @@ TEST_F(EkfBasicsTest, global_position_from_opt_flow)
 	_sensor_simulator.runSeconds(1);
 
 	// THEN; since there is no origin, only the local position can be valid
-	EXPECT_TRUE(_ekf->isLocalHorizontalPositionValid());
+	EXPECT_TRUE(_ekf->local_position_is_valid());
 	EXPECT_FALSE(_ekf->global_origin_valid());
-	EXPECT_FALSE(_ekf->isGlobalHorizontalPositionValid());
+	EXPECT_FALSE(_ekf->global_position_is_valid());
 
 	_latitude_new  = 45.0000005;
 	_longitude_new = 111.0000005;
@@ -356,8 +351,8 @@ TEST_F(EkfBasicsTest, global_position_from_opt_flow)
 
 	// THEN: local and global positions are valid
 	EXPECT_TRUE(_ekf->global_origin_valid());
-	EXPECT_TRUE(_ekf->isGlobalHorizontalPositionValid());
-	EXPECT_TRUE(_ekf->isLocalHorizontalPositionValid());
+	EXPECT_TRUE(_ekf->global_position_is_valid());
+	EXPECT_TRUE(_ekf->local_position_is_valid());
 }
 
 // TODO: Add sampling tests

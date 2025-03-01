@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file AccessRequest.hpp
+ * @file Access.hpp
  *
  * Defines a Access Service invoker and process Access responses
  *

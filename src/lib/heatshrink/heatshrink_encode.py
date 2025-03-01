@@ -419,3 +419,4 @@ def encode(data, window_size, lookahead_size):
         if sunk == in_size:
             heatshrink_encoder_finish(hse)
     return ret
+

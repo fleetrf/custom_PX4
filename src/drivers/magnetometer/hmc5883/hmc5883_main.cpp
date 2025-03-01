@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file hmc5883_main.cpp
+ * @file hmc5883.cpp
  *
  * Driver for the HMC5883 / HMC5983 magnetometer connected via I2C or SPI.
  */

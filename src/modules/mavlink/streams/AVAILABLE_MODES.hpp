@@ -86,8 +86,7 @@ private:
 		const bool cannot_be_selected = (vehicle_status.can_set_nav_states_mask & (1u << nav_state)) == 0;
 
 		// Set the mode name if not a standard mode
-		available_modes.standard_mode = (uint8_t)mode_util::getStandardModeFromNavState(nav_state, vehicle_status.vehicle_type,
-						vehicle_status.is_vtol);
+		available_modes.standard_mode = (uint8_t)mode_util::getStandardModeFromNavState(nav_state);
 
 		if (mode_util::isAdvanced(nav_state)) {
 			available_modes.properties |= MAV_MODE_PROPERTY_ADVANCED;

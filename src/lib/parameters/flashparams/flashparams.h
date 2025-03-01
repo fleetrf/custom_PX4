@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file flashparams.h
+ * @file param.h
  *
  * Global flash based parameter store.
  *

@@ -84,3 +84,4 @@ mat3f vnm_negative_mat3f(mat3f m);
 #endif
 
 #endif
+

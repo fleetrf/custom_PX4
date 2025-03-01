@@ -254,3 +254,4 @@ typedef uint8_t main_state_t;
 typedef uint8_t hil_state_t;
 typedef uint8_t navigation_state_t;
 typedef uint8_t switch_pos_t;
+

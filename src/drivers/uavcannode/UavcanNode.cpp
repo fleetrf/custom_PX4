@@ -125,7 +125,7 @@ namespace uavcannode
 
 
 /**
- * @file UavcanNode.cpp
+ * @file uavcan_main.cpp
  *
  * Implements basic functionality of UAVCAN node.
  *

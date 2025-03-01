@@ -40,7 +40,9 @@ px4_add_module(
 		-Wno-address-of-packed-member # TODO: fix in c_library_v2
 	INCLUDES
 		${CMAKE_BINARY_DIR}/mavlink
-		${CMAKE_BINARY_DIR}/mavlink/${CONFIG_MAVLINK_DIALECT}
+		${CMAKE_BINARY_DIR}/mavlink/development
+		${CMAKE_BINARY_DIR}/mavlink/common
+		${CMAKE_BINARY_DIR}/mavlink/standard
 	SRCS
 		SimulatorMavlink.cpp
 		SimulatorMavlink.hpp

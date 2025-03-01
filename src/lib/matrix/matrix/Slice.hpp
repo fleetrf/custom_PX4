@@ -116,39 +116,6 @@ public:
 		return self;
 	}
 
-	template<size_t MM, size_t NN>
-	Matrix<Type, P, Q> operator-(const SliceT<const Matrix<Type, MM, NN>, Type, P, Q, MM, NN> &other)
-	{
-		return Matrix<Type, P, Q> {*this} - other;
-	}
-
-
-	Matrix<Type, P, Q> operator-(const Matrix<Type, P, Q> &other)
-	{
-		return Matrix<Type, P, Q> {*this} - other;
-	}
-
-	Matrix<Type, P, Q> operator-(const Type &other)
-	{
-		return Matrix<Type, P, Q> {*this} - other;
-	}
-
-	template<size_t MM, size_t NN>
-	Matrix<Type, P, Q> operator+(const SliceT<const Matrix<Type, MM, NN>, Type, P, Q, MM, NN> &other)
-	{
-		return Matrix<Type, P, Q> {*this} + other;
-	}
-
-	Matrix<Type, P, Q> operator+(const Matrix<Type, P, Q> &other)
-	{
-		return Matrix<Type, P, Q> {*this} + other;
-	}
-
-	Matrix<Type, P, Q> operator+(const Type &other)
-	{
-		return Matrix<Type, P, Q> {*this} + other;
-	}
-
 	// allow assigning vectors to a slice that are in the axis
 	template <size_t DUMMY = 1> // make this a template function since it only exists for some instantiations
 	SliceT<MatrixT, Type, 1, Q, M, N> &operator=(const Vector<Type, Q> &other)
@@ -255,19 +222,29 @@ public:
 		return self;
 	}
 
-	SliceT<MatrixT, Type, P, Q, M, N> &operator/=(const Type &scalar)
+	SliceT<MatrixT, Type, P, Q, M, N> &operator/=(const Type &other)
 	{
-		return operator*=(Type(1) / scalar);
+		return operator*=(Type(1) / other);
 	}
 
-	Matrix<Type, P, Q> operator*(const Type &scalar) const
+	Matrix<Type, P, Q> operator*(const Type &other) const
 	{
-		return Matrix<Type, P, Q> {*this} * scalar;
+		const SliceT<MatrixT, Type, P, Q, M, N> &self = *this;
+		Matrix<Type, P, Q> res;
+
+		for (size_t i = 0; i < P; i++) {
+			for (size_t j = 0; j < Q; j++) {
+				res(i, j) = self(i, j) * other;
+			}
+		}
+
+		return res;
 	}
 
-	Matrix<Type, P, Q> operator/(const Type &scalar) const
+	Matrix<Type, P, Q> operator/(const Type &other) const
 	{
-		return (*this) * (1 / scalar);
+		const SliceT<MatrixT, Type, P, Q, M, N> &self = *this;
+		return self * (Type(1) / other);
 	}
 
 	template<size_t R, size_t S>

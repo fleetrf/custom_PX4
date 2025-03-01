@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file BlockHighPass.cpp
+ * @file blocks.cpp
  *
  * Controller library code
  */

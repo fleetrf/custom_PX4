@@ -169,8 +169,7 @@ private:
 	class LogFileBuffer
 	{
 	public:
-		LogFileBuffer(size_t log_buffer_desired_size, size_t log_buffer_min_size,
-			      perf_counter_t perf_write, perf_counter_t perf_fsync);
+		LogFileBuffer(size_t log_buffer_size, perf_counter_t perf_write, perf_counter_t perf_fsync);
 
 		~LogFileBuffer();
 
@@ -204,8 +203,7 @@ private:
 		bool _should_run = false;
 		px4::atomic_bool _had_write_error{false};
 	private:
-		size_t _buffer_size;
-		const size_t _buffer_size_min;
+		const size_t _buffer_size;
 		int	_fd = -1;
 		uint8_t *_buffer = nullptr;
 		size_t _head = 0; ///< next position to write to
@@ -224,7 +222,7 @@ private:
 	pthread_cond_t		_cv;
 	pthread_t _thread = 0;
 #if defined(PX4_CRYPTO)
-	bool init_logfile_encryption(const LogType type);
+	bool init_logfile_encryption(const char *filename);
 	PX4Crypto _crypto;
 	int _min_blocksize;
 	px4_crypto_algorithm_t _algorithm;

@@ -52,8 +52,7 @@ class AlphaFilter
 {
 public:
 	AlphaFilter() = default;
-	explicit AlphaFilter(float sample_interval, float time_constant) { setParameters(sample_interval, time_constant); }
-	explicit AlphaFilter(float time_constant) : _time_constant(time_constant) {};
+	explicit AlphaFilter(float alpha) : _alpha(alpha) {}
 
 	~AlphaFilter() = default;
 
@@ -62,8 +61,8 @@ public:
 	 *
 	 * Both parameters have to be provided in the same units.
 	 *
-	 * @param sample_interval interval between two samples in seconds
-	 * @param time_constant filter time constant determining convergence in seconds
+	 * @param sample_interval interval between two samples
+	 * @param time_constant filter time constant determining convergence
 	 */
 	void setParameters(float sample_interval, float time_constant)
 	{
@@ -72,8 +71,6 @@ public:
 		if (denominator > FLT_EPSILON) {
 			setAlpha(sample_interval / denominator);
 		}
-
-		_time_constant = time_constant;
 	}
 
 	bool setCutoffFreq(float sample_freq, float cutoff_freq)
@@ -85,18 +82,9 @@ public:
 			return false;
 		}
 
-		setParameters(1.f / sample_freq, 1.f / (M_TWOPI_F * cutoff_freq));
+		setParameters(1.f / sample_freq, 1.f / (2.f * M_PI_F * cutoff_freq));
+		_cutoff_freq = cutoff_freq;
 		return true;
-	}
-
-	void setCutoffFreq(float cutoff_freq)
-	{
-		if (cutoff_freq > FLT_EPSILON) {
-			_time_constant = 1.f / (M_TWOPI_F * cutoff_freq);
-
-		} else {
-			_time_constant = 0.f;
-		}
 	}
 
 	/**
@@ -124,19 +112,14 @@ public:
 		return _filter_state;
 	}
 
-	const T update(const T &sample, float dt)
-	{
-		setParameters(dt, _time_constant);
-		return update(sample);
-	}
-
 	const T &getState() const { return _filter_state; }
-	float getCutoffFreq() const { return 1.f / (M_TWOPI_F * _time_constant); }
+	float getCutoffFreq() const { return _cutoff_freq; }
 
 protected:
 	T updateCalculation(const T &sample);
 
-	float _time_constant{0.f};
+
+	float _cutoff_freq{0.f};
 	float _alpha{0.f};
 	T _filter_state{};
 };

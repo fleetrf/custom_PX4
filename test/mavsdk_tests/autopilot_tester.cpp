@@ -96,7 +96,7 @@ void AutopilotTester::wait_until_ready()
 
 	// Wait until we can arm
 	CHECK(poll_condition_with_timeout(
-	[this]() {	return _telemetry->health().is_armable;	}, std::chrono::seconds(45)));
+	[this]() {	return _telemetry->health().is_armable;	}, std::chrono::seconds(20)));
 }
 
 void AutopilotTester::store_home()
@@ -271,16 +271,9 @@ void AutopilotTester::execute_mission()
 	REQUIRE(poll_condition_with_timeout(
 	[this]() { return _mission->start_mission() == Mission::Result::Success; }, std::chrono::seconds(3)));
 
-	float speed_factor = 1.0f;
+	// TODO: Adapt time limit based on mission size, flight speed, sim speed factor, etc.
 
-	if (_info != nullptr) {
-		speed_factor = _info->get_speed_factor().second;
-	}
-
-	const float mission_finish_waiting_time_in_simulation_s = 500.f;
-	float mission_finish_waiting_time_in_real_s = mission_finish_waiting_time_in_simulation_s / speed_factor;
-
-	wait_for_mission_finished(std::chrono::seconds(static_cast<int>(mission_finish_waiting_time_in_real_s)));
+	wait_for_mission_finished(std::chrono::seconds(90));
 }
 
 void AutopilotTester::execute_mission_and_lose_gps()
@@ -395,16 +388,9 @@ void AutopilotTester::execute_mission_raw()
 {
 	REQUIRE(_mission->start_mission() == Mission::Result::Success);
 
-	float speed_factor = 1.0f;
+	// TODO: Adapt time limit based on mission size, flight speed, sim speed factor, etc.
 
-	if (_info != nullptr) {
-		speed_factor = _info->get_speed_factor().second;
-	}
-
-	const float waiting_time_simulation_time_s = 300.f; // currently this is tuned for the VTOL wind test
-	float waiting_time_absolute_s = waiting_time_simulation_time_s / speed_factor;
-
-	wait_for_mission_raw_finished(std::chrono::seconds(static_cast<int>(waiting_time_absolute_s)));
+	wait_for_mission_raw_finished(std::chrono::seconds(120));
 }
 
 void AutopilotTester::execute_rtl()
@@ -452,29 +438,8 @@ void AutopilotTester::fly_forward_in_posctl()
 	}
 
 	CHECK(_manual_control->start_position_control() == ManualControl::Result::Success);
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	store_home();
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	wait_until_ready();
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	arm();
 
 	// Climb up for 5 seconds
@@ -511,36 +476,9 @@ void AutopilotTester::fly_forward_in_altctl()
 	}
 
 	CHECK(_manual_control->start_altitude_control() == ManualControl::Result::Success);
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	store_home();
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	wait_until_ready();
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
-
 	arm();
-
-	// Send something to make sure RC is available.
-	for (unsigned i = 0; i < 1 * manual_control_rate_hz; ++i) {
-		CHECK(_manual_control->set_manual_control_input(0.f, 0.f, 0.5f, 0.f) == ManualControl::Result::Success);
-		sleep_for(std::chrono::milliseconds(1000 / manual_control_rate_hz));
-	}
 
 	// Climb up for 5 seconds
 	for (unsigned i = 0; i < 5 * manual_control_rate_hz; ++i) {

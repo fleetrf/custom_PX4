@@ -45,7 +45,9 @@ class FunctionManualRC : public FunctionProviderBase
 public:
 	FunctionManualRC()
 	{
-		resetAllToDisarmedValue();
+		for (int i = 0; i < num_data_points; ++i) {
+			_data[i] = NAN;
+		}
 	}
 
 	static FunctionProviderBase *allocate(const Context &context) { return new FunctionManualRC(); }
@@ -55,22 +57,17 @@ public:
 		manual_control_setpoint_s manual_control_setpoint;
 
 		if (_topic.update(&manual_control_setpoint)) {
-			if (manual_control_setpoint.valid) {
-				_data[0] = manual_control_setpoint.roll;
-				_data[1] = manual_control_setpoint.pitch;
-				_data[2] = manual_control_setpoint.throttle;
-				_data[3] = manual_control_setpoint.yaw;
-				_data[4] = manual_control_setpoint.flaps;
-				_data[5] = manual_control_setpoint.aux1;
-				_data[6] = manual_control_setpoint.aux2;
-				_data[7] = manual_control_setpoint.aux3;
-				_data[8] = manual_control_setpoint.aux4;
-				_data[9] = manual_control_setpoint.aux5;
-				_data[10] = manual_control_setpoint.aux6;
-
-			} else {
-				resetAllToDisarmedValue();
-			}
+			_data[0] = manual_control_setpoint.roll;
+			_data[1] = manual_control_setpoint.pitch;
+			_data[2] = manual_control_setpoint.throttle;
+			_data[3] = manual_control_setpoint.yaw;
+			_data[4] = manual_control_setpoint.flaps;
+			_data[5] = manual_control_setpoint.aux1;
+			_data[6] = manual_control_setpoint.aux2;
+			_data[7] = manual_control_setpoint.aux3;
+			_data[8] = manual_control_setpoint.aux4;
+			_data[9] = manual_control_setpoint.aux5;
+			_data[10] = manual_control_setpoint.aux6;
 		}
 	}
 
@@ -78,13 +75,6 @@ public:
 
 private:
 	static constexpr int num_data_points = 11;
-
-	void resetAllToDisarmedValue()
-	{
-		for (int i = 0; i < num_data_points; ++i) {
-			_data[i] = NAN;
-		}
-	}
 
 	static_assert(num_data_points == (int)OutputFunction::RC_AUXMax - (int)OutputFunction::RC_Roll + 1,
 		      "number of functions mismatch");
