@@ -68,6 +68,8 @@
 	 /** @see ModuleBase::print_status() */
 	 int print_status() override;
 
+	 bool changeFlightMode(const uint32_t cmd);
+
  private:
 
 	 /**
