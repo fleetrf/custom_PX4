@@ -249,9 +249,9 @@ int BATT_SMBUS::get_cell_voltages()
 		uint8_t DAstatus1[32 + 2] = {}; // 32 bytes of data and 2 bytes of address
 
 		//TODO: need to consider if set voltages to 0? -1?
-		if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS1, DAstatus1, sizeof(DAstatus1))) {
-			return PX4_ERROR;
-		}
+		// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS1, DAstatus1, sizeof(DAstatus1))) {
+		// 	return PX4_ERROR;
+		// }
 
 		// Convert millivolts to volts.
 		_cell_voltages[0] = ((float)((DAstatus1[1] << 8) | DAstatus1[0]) / 1000.0f);
@@ -265,9 +265,9 @@ int BATT_SMBUS::get_cell_voltages()
 		uint8_t DAstatus3[18 + 2] = {}; // 18 bytes of data and 2 bytes of address
 
 		//TODO: need to consider if set voltages to 0? -1?
-		if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS3, DAstatus3, sizeof(DAstatus3))) {
-			return PX4_ERROR;
-		}
+		// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS3, DAstatus3, sizeof(DAstatus3))) {
+		// 	return PX4_ERROR;
+		// }
 
 		_cell_voltages[4] = ((float)((DAstatus3[1] << 8) | DAstatus3[0]) / 1000.0f);
 		_cell_voltages[5] = ((float)((DAstatus3[7] << 8) | DAstatus3[6]) / 1000.0f);
@@ -330,41 +330,41 @@ void BATT_SMBUS::set_undervoltage_protection(float average_current)
 }
 
 //@NOTE: Currently unused, could be helpful for debugging a parameter set though.
-int BATT_SMBUS::dataflash_read(const uint16_t address, void *data, const unsigned length)
-{
-	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
+// int BATT_SMBUS::dataflash_read(const uint16_t address, void *data, const unsigned length)
+// {
+// 	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
 
-	int ret = _interface->block_write(code, &address, 2, true);
+// 	int ret = _interface->block_write(code, &address, 2, true);
 
-	if (ret != PX4_OK) {
-		return ret;
-	}
+// 	if (ret != PX4_OK) {
+// 		return ret;
+// 	}
 
-	ret = _interface->block_read(code, data, length, true);
+// 	ret = _interface->block_read(code, data, length, true);
 
-	return ret;
-}
+// 	return ret;
+// }
 
-int BATT_SMBUS::dataflash_write(const uint16_t address, void *data, const unsigned length)
-{
-	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
+// int BATT_SMBUS::dataflash_write(const uint16_t address, void *data, const unsigned length)
+// {
+// 	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
 
-	uint8_t tx_buf[MAC_DATA_BUFFER_SIZE + 2] = {};
+// 	uint8_t tx_buf[MAC_DATA_BUFFER_SIZE + 2] = {};
 
-	tx_buf[0] = address & 0xff;
-	tx_buf[1] = (address >> 8) & 0xff;
+// 	tx_buf[0] = address & 0xff;
+// 	tx_buf[1] = (address >> 8) & 0xff;
 
-	if (length > MAC_DATA_BUFFER_SIZE) {
-		return PX4_ERROR;
-	}
+// 	if (length > MAC_DATA_BUFFER_SIZE) {
+// 		return PX4_ERROR;
+// 	}
 
-	memcpy(&tx_buf[2], data, length);
+// 	memcpy(&tx_buf[2], data, length);
 
-	// code (1), byte_count (1), addr(2), data(32) + pec
-	int ret = _interface->block_write(code, tx_buf, length + 2, false);
+// 	// code (1), byte_count (1), addr(2), data(32) + pec
+// 	int ret = _interface->block_write(code, tx_buf, length + 2, false);
 
-	return ret;
-}
+// 	return ret;
+// }
 
 int BATT_SMBUS::get_startup_info()
 {
@@ -436,89 +436,89 @@ int BATT_SMBUS::get_startup_info()
 	return ret;
 }
 
-int BATT_SMBUS::manufacturer_read(const uint16_t cmd_code, void *data, const unsigned length)
-{
-	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
+// int BATT_SMBUS::manufacturer_read(const uint16_t cmd_code, void *data, const unsigned length)
+// {
+// 	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
 
-	uint8_t address[2] = {};
-	address[0] = ((uint8_t *)&cmd_code)[0];
-	address[1] = ((uint8_t *)&cmd_code)[1];
+// 	uint8_t address[2] = {};
+// 	address[0] = ((uint8_t *)&cmd_code)[0];
+// 	address[1] = ((uint8_t *)&cmd_code)[1];
 
-	int ret = _interface->block_write(code, address, 2, false);
+// 	int ret = _interface->block_write(code, address, 2, false);
 
-	if (ret != PX4_OK) {
-		return ret;
-	}
+// 	if (ret != PX4_OK) {
+// 		return ret;
+// 	}
 
-	ret = _interface->block_read(code, data, length, true);
-	memmove(data, &((uint8_t *)data)[2], length - 2); // remove the address bytes
+// 	ret = _interface->block_read(code, data, length, true);
+// 	memmove(data, &((uint8_t *)data)[2], length - 2); // remove the address bytes
 
-	return ret;
-}
+// 	return ret;
+// }
 
-int BATT_SMBUS::manufacturer_write(const uint16_t cmd_code, void *data, const unsigned length)
-{
-	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
+// int BATT_SMBUS::manufacturer_write(const uint16_t cmd_code, void *data, const unsigned length)
+// {
+// 	uint8_t code = BATT_SMBUS_MANUFACTURER_BLOCK_ACCESS;
 
-	uint8_t tx_buf[MAC_DATA_BUFFER_SIZE + 2] = {};
-	tx_buf[0] = cmd_code & 0xff;
-	tx_buf[1] = (cmd_code >> 8) & 0xff;
+// 	uint8_t tx_buf[MAC_DATA_BUFFER_SIZE + 2] = {};
+// 	tx_buf[0] = cmd_code & 0xff;
+// 	tx_buf[1] = (cmd_code >> 8) & 0xff;
 
-	if (data != nullptr && length <= MAC_DATA_BUFFER_SIZE) {
-		memcpy(&tx_buf[2], data, length);
-	}
+// 	if (data != nullptr && length <= MAC_DATA_BUFFER_SIZE) {
+// 		memcpy(&tx_buf[2], data, length);
+// 	}
 
-	int ret = _interface->block_write(code, tx_buf, length + 2, false);
+// 	int ret = _interface->block_write(code, tx_buf, length + 2, false);
 
-	return ret;
-}
+// 	return ret;
+// }
 
-int BATT_SMBUS::unseal()
-{
-	// See bq40z50 technical reference.
-	uint16_t keys[2] = {0x0414, 0x3672};
+// int BATT_SMBUS::unseal()
+// {
+// 	// See bq40z50 technical reference.
+// 	uint16_t keys[2] = {0x0414, 0x3672};
 
-	int ret = _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, keys[0]);
+// 	int ret = _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, keys[0]);
 
-	ret |= _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, keys[1]);
+// 	ret |= _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, keys[1]);
 
-	return ret;
-}
+// 	return ret;
+// }
 
-int BATT_SMBUS::seal()
-{
-	// See bq40z50 technical reference.
-	return manufacturer_write(BATT_SMBUS_SEAL, nullptr, 0);
-}
+// int BATT_SMBUS::seal()
+// {
+// 	// See bq40z50 technical reference.
+// 	return manufacturer_write(BATT_SMBUS_SEAL, nullptr, 0);
+// }
 
-int BATT_SMBUS::lifetime_data_flush()
-{
-	return manufacturer_write(BATT_SMBUS_LIFETIME_FLUSH, nullptr, 0);
-}
+// int BATT_SMBUS::lifetime_data_flush()
+// {
+// 	return manufacturer_write(BATT_SMBUS_LIFETIME_FLUSH, nullptr, 0);
+// }
 
-int BATT_SMBUS::lifetime_read_block_one()
-{
-	uint8_t lifetime_block_one[32 + 2] = {}; // 32 bytes of data and 2 bytes of address
+// int BATT_SMBUS::lifetime_read_block_one()
+// {
+// 	uint8_t lifetime_block_one[32 + 2] = {}; // 32 bytes of data and 2 bytes of address
 
-	if (PX4_OK != manufacturer_read(BATT_SMBUS_LIFETIME_BLOCK_ONE, lifetime_block_one, sizeof(lifetime_block_one))) {
-		PX4_INFO("Failed to read lifetime block 1.");
-		return PX4_ERROR;
-	}
+// 	if (PX4_OK != manufacturer_read(BATT_SMBUS_LIFETIME_BLOCK_ONE, lifetime_block_one, sizeof(lifetime_block_one))) {
+// 		PX4_INFO("Failed to read lifetime block 1.");
+// 		return PX4_ERROR;
+// 	}
 
-	//Get max cell voltage delta and convert from mV to V.
-	if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z50) {
+// 	//Get max cell voltage delta and convert from mV to V.
+// 	if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z50) {
 
-		_lifetime_max_delta_cell_voltage = (float)(lifetime_block_one[17] << 8 | lifetime_block_one[16]) / 1000.0f;
+// 		_lifetime_max_delta_cell_voltage = (float)(lifetime_block_one[17] << 8 | lifetime_block_one[16]) / 1000.0f;
 
-	} else if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
+// 	} else if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
 
-		_lifetime_max_delta_cell_voltage = (float)(lifetime_block_one[29] << 8 | lifetime_block_one[28]) / 1000.0f;
-	}
+// 		_lifetime_max_delta_cell_voltage = (float)(lifetime_block_one[29] << 8 | lifetime_block_one[28]) / 1000.0f;
+// 	}
 
-	PX4_INFO("Max Cell Delta: %4.2f", (double)_lifetime_max_delta_cell_voltage);
+// 	PX4_INFO("Max Cell Delta: %4.2f", (double)_lifetime_max_delta_cell_voltage);
 
-	return PX4_OK;
-}
+// 	return PX4_OK;
+// }
 
 void BATT_SMBUS::print_usage()
 {
