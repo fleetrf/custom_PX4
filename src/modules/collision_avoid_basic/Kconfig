@@ -1,0 +1,5 @@
+menuconfig MODULES_COLLISION_AVOID_BASIC
+	bool "collision_avoid_basic"
+	default y
+	---help---
+		Enable support for collision_avoid_basic_app

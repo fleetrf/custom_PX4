@@ -248,6 +248,14 @@ else
 	fi
 
 	#
+	# Start collision avoidance if tfminis sensors are enabled
+	#
+	if param compare -s SENS_EN_TFMINIS 1
+	then
+		collision_avoid_basic start -e
+	fi
+
+	#
 	# Start the socket communication send_event handler.
 	#
 	send_event start

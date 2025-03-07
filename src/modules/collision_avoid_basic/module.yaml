@@ -1,0 +1,20 @@
+module_name: collision_avoid_basic
+
+parameters:
+    - group: Sensors
+      definitions:
+        COLLIS_DIST_WARN:
+            description:
+                short: closest dist
+                long: |
+                    Closest dist to trigger collision
+
+            type: float
+            min: 1
+            max: 10
+            unit: m
+            decimal: 3
+            reboot_required: false  #weirdly dosent work... maybe due to group or something
+            num_instances: 1
+            instance_start: 0
+            default: 1    #for each instance
