@@ -63,11 +63,16 @@
 
 #include <lib/drivers/device/Device.hpp> // For DeviceId union
 
+#include <parameters/param.h>
+
 #ifdef CONFIG_NET
 #define MAVLINK_RECEIVER_NET_ADDED_STACK 1360
 #else
 #define MAVLINK_RECEIVER_NET_ADDED_STACK 0
 #endif
+
+//CC FAILSAFE VARIABLES
+int number_of_dead_msgs = 0;
 
 MavlinkReceiver::~MavlinkReceiver()
 {
@@ -132,9 +137,13 @@ MavlinkReceiver::acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, ui
 	_cmd_ack_pub.publish(command_ack);
 }
 
+long int msg_id = 0;
+
 void
 MavlinkReceiver::handle_message(mavlink_message_t *msg)
 {
+	msg_id = msg->msgid;
+
 	switch (msg->msgid) {
 	case MAVLINK_MSG_ID_COMMAND_LONG:
 		handle_message_command_long(msg);
@@ -2857,7 +2866,7 @@ void MavlinkReceiver::handle_message_generator_status(mavlink_message_t *msg)
 
 void MavlinkReceiver::handle_message_statustext(mavlink_message_t *msg)
 {
-	if (msg->sysid == mavlink_system.sysid) {
+	if (msg->sysid == mavlink_system.sysid) { //default mavlink sysid = 1
 		// log message from the same system
 
 		mavlink_statustext_t statustext;
@@ -2870,6 +2879,14 @@ void MavlinkReceiver::handle_message_statustext(mavlink_message_t *msg)
 		if (_mavlink_statustext_handler.should_publish_current(statustext, hrt_absolute_time())) {
 			_log_message_pub.publish(_mavlink_statustext_handler.log_message());
 		}
+	}
+
+	// PX4_INFO("HEARTBEAT DETECTED");
+	mavlink_statustext_t status_msg;
+	mavlink_msg_statustext_decode(msg, &status_msg);
+
+	if(strcmp((char *)status_msg.text, "alive")==0){	//alive msg not received
+		number_of_dead_msgs = 0;
 	}
 }
 
@@ -3144,6 +3161,45 @@ MavlinkReceiver::run()
 
 						/* handle generic messages and commands */
 						handle_message(&msg);
+
+						//CC DETECTION
+						param_t cc_detection = PARAM_INVALID;
+						cc_detection = param_find("CC_ENABLED");
+
+						int32_t cc_connected_check = 0;
+						param_get(cc_detection, &cc_connected_check);
+
+						if(cc_connected_check){
+							if(msg_id !=253){		//implying no string received
+								number_of_dead_msgs++;
+								// PX4_INFO("NUM !HEARTBEAT %d", number_of_dead_msgs);
+							}
+							if(number_of_dead_msgs >=10){	//10 corresponds to a 2 second timer
+								PX4_INFO("CC IS DEAD, LAND ASAP");
+								vehicle_command_s vcmd{};			//trigger land
+								vcmd.timestamp = hrt_absolute_time();
+								vcmd.param1 = 0.0f;
+								vcmd.param2 = 0.0f;
+								vcmd.param3 = 0.0f;
+								vcmd.param4 = 0.0f;
+								vcmd.param5 = 0.0f;
+								vcmd.param6 = 0.0f;
+								vcmd.param7 = NAN;
+								vcmd.command = MAV_CMD_NAV_LAND;
+								vcmd.target_system = mavlink_system.sysid;
+								vcmd.target_component = mavlink_system.compid;
+								vcmd.source_system = mavlink_system.sysid;
+								vcmd.source_component = mavlink_system.compid;
+								vcmd.from_external = true;
+
+								uORB::Publication<vehicle_command_s> pub{ORB_ID(vehicle_command)};
+								pub.publish(vcmd);
+								// if we want only one messagge, then we have to do some status monitoring
+
+							}
+						}else{
+							PX4_INFO("CC NOT CONNECTED");
+						}
 
 						/* handle packet with mission manager */
 						_mission_manager.handle_message(&msg);

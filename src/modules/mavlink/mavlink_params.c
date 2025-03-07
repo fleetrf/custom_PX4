@@ -155,3 +155,14 @@ PARAM_DEFINE_INT32(MAV_HB_FORW_EN, 1);
  * @max 250
  */
 PARAM_DEFINE_INT32(MAV_RADIO_TOUT, 5);
+
+/**
+ * Companion Computer enabled
+ *
+ * If true (companion computer is connected), it enables triggering of
+ * the failsafe incase companion computer is disconnected
+ *
+ * @group MAVLink
+ * @boolean
+ */
+PARAM_DEFINE_INT32(CC_ENABLED, 0);
