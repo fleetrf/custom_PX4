@@ -75,7 +75,7 @@ BATT_SMBUS::BATT_SMBUS(const I2CSPIDriverConfig &config, SMBus *interface) :
 	// unseal() here to allow an external config script to write to protected flash.
 	// This is neccessary to avoid bus errors due to using standard i2c mode instead of SMbus mode.
 	// The external config script should then seal() the device.
-	unseal();
+	// unseal();
 }
 
 BATT_SMBUS::~BATT_SMBUS()
@@ -111,19 +111,22 @@ void BATT_SMBUS::RunImpl()
 
 	ret |= _interface->read_word(BATT_SMBUS_VOLTAGE, result);
 
-	if(!(_device_type == SMBUS_DEVICE_TYPE::BQ34Z100)){		//bq34z100 cannot read individual cell voltages; only overall
 
-		ret |= get_cell_voltages();
+	//verify that 65535 is being put into the uorb bat cells array
 
-		for (int i = 0; i < _cell_count; i++) {
-			new_report.voltage_cell_v[i] = _cell_voltages[i];
-		}
-	} else{
+	// if(!(_device_type == SMBUS_DEVICE_TYPE::BQ34Z100)){		//bq34z100 cannot read individual cell voltages; only overall
 
-		for (int i = 0; i < _cell_count; i++) {
-			new_report.voltage_cell_v[i] = 65535;			//default value when cell voltage is not known
-		}
+	// 	ret |= get_cell_voltages();
+
+	// 	for (int i = 0; i < _cell_count; i++) {
+	// 		new_report.voltage_cell_v[i] = _cell_voltages[i];
+	// 	}
+	// } else{
+
+	for (int i = 0; i < _cell_count; i++) {
+		new_report.voltage_cell_v[i] = 65535;			//default value when cell voltage is not known
 	}
+	// }
 
 	// Convert millivolts to volts.
 	new_report.voltage_v = ((float)result) / 1000.0f;
@@ -144,11 +147,11 @@ void BATT_SMBUS::RunImpl()
 
 	// If current is high, turn under voltage protection off. This is neccessary to prevent
 	// a battery from cutting off while flying with high current near the end of the packs capacity.
-	set_undervoltage_protection(average_current);
+	// set_undervoltage_protection(average_current);
 
 	// Read run time to empty (minutes).
-	ret |= _interface->read_word(BATT_SMBUS_RUN_TIME_TO_EMPTY, result);
-	new_report.time_remaining_s = result * 60;
+	// ret |= _interface->read_word(BATT_SMBUS_RUN_TIME_TO_EMPTY, result);
+	// new_report.time_remaining_s = result * 60;
 
 	// Read average time to empty (minutes).
 	ret |= _interface->read_word(BATT_SMBUS_AVERAGE_TIME_TO_EMPTY, result);
@@ -161,7 +164,7 @@ void BATT_SMBUS::RunImpl()
 	new_report.discharged_mah = _batt_startup_capacity - (float)result * _c_mult;
 
 	// Read Relative SOC.
-	ret |= _interface->read_word(BATT_SMBUS_RELATIVE_SOC, result);
+	// ret |= _interface->read_word(BATT_SMBUS_RELATIVE_SOC, result);
 
 	// Normalize 0.0 to 1.0
 	new_report.remaining = (float)result / 100.0f;
@@ -179,15 +182,16 @@ void BATT_SMBUS::RunImpl()
 		new_report.capacity = _batt_capacity;
 		new_report.cycle_count = _cycle_count;
 		new_report.serial_number = _serial_number;
-		new_report.max_cell_voltage_delta = _max_cell_voltage_delta;
+		// new_report.max_cell_voltage_delta = _max_cell_voltage_delta;
 		new_report.cell_count = _cell_count;
 		new_report.state_of_health = _state_of_health;
 
 		// Check if max lifetime voltage delta is greater than allowed.
-		if (_lifetime_max_delta_cell_voltage > BATT_CELL_VOLTAGE_THRESHOLD_FAILED) {
-			new_report.warning = battery_status_s::BATTERY_WARNING_CRITICAL;
+		// if (_lifetime_max_delta_cell_voltage > BATT_CELL_VOLTAGE_THRESHOLD_FAILED) {
+		// 	new_report.warning = battery_status_s::BATTERY_WARNING_CRITICAL;
 
-		} else if (new_report.remaining > _low_thr) {
+		// } else
+		if (new_report.remaining > _low_thr) {
 			new_report.warning = battery_status_s::BATTERY_WARNING_NONE;
 
 		} else if (new_report.remaining > _crit_thr) {
@@ -219,115 +223,115 @@ void BATT_SMBUS::resume()
 	ScheduleOnInterval(BATT_SMBUS_MEASUREMENT_INTERVAL_US);
 }
 
-int BATT_SMBUS::get_cell_voltages()
-{
-	// Temporary variable for storing SMBUS reads.
-	uint16_t result = 0;
-	int ret = PX4_OK;
+// int BATT_SMBUS::get_cell_voltages()
+// {
+// 	// Temporary variable for storing SMBUS reads.
+// 	uint16_t result = 0;
+// 	int ret = PX4_OK;
 
-	if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z50) {
-		ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_1_VOLTAGE, result);
-		// Convert millivolts to volts.
-		_cell_voltages[0] = ((float)result) / 1000.0f;
+	// if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z50) {
+	// 	ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_1_VOLTAGE, result);
+	// 	// Convert millivolts to volts.
+	// 	_cell_voltages[0] = ((float)result) / 1000.0f;
 
-		ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_2_VOLTAGE, result);
-		// Convert millivolts to volts.
-		_cell_voltages[1] = ((float)result) / 1000.0f;
+	// 	ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_2_VOLTAGE, result);
+	// 	// Convert millivolts to volts.
+	// 	_cell_voltages[1] = ((float)result) / 1000.0f;
 
-		ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_3_VOLTAGE, result);
-		// Convert millivolts to volts.
-		_cell_voltages[2] = ((float)result) / 1000.0f;
+	// 	ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_3_VOLTAGE, result);
+	// 	// Convert millivolts to volts.
+	// 	_cell_voltages[2] = ((float)result) / 1000.0f;
 
-		ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_4_VOLTAGE, result);
-		// Convert millivolts to volts.
-		_cell_voltages[3] = ((float)result) / 1000.0f;
-		_cell_voltages[4] = 0;
-		_cell_voltages[5] = 0;
-		_cell_voltages[6] = 0;
+	// 	ret |= _interface->read_word(BATT_SMBUS_BQ40Z50_CELL_4_VOLTAGE, result);
+	// 	// Convert millivolts to volts.
+	// 	_cell_voltages[3] = ((float)result) / 1000.0f;
+	// 	_cell_voltages[4] = 0;
+	// 	_cell_voltages[5] = 0;
+	// 	_cell_voltages[6] = 0;
 
-	} else if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
-		uint8_t DAstatus1[32 + 2] = {}; // 32 bytes of data and 2 bytes of address
+	// } else if (_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
+	// 	uint8_t DAstatus1[32 + 2] = {}; // 32 bytes of data and 2 bytes of address
 
-		//TODO: need to consider if set voltages to 0? -1?
-		// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS1, DAstatus1, sizeof(DAstatus1))) {
-		// 	return PX4_ERROR;
-		// }
+	// 	//TODO: need to consider if set voltages to 0? -1?
+	// 	// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS1, DAstatus1, sizeof(DAstatus1))) {
+	// 	// 	return PX4_ERROR;
+	// 	// }
 
-		// Convert millivolts to volts.
-		_cell_voltages[0] = ((float)((DAstatus1[1] << 8) | DAstatus1[0]) / 1000.0f);
-		_cell_voltages[1] = ((float)((DAstatus1[3] << 8) | DAstatus1[2]) / 1000.0f);
-		_cell_voltages[2] = ((float)((DAstatus1[5] << 8) | DAstatus1[4]) / 1000.0f);
-		_cell_voltages[3] = ((float)((DAstatus1[7] << 8) | DAstatus1[6]) / 1000.0f);
+	// 	// Convert millivolts to volts.
+	// 	_cell_voltages[0] = ((float)((DAstatus1[1] << 8) | DAstatus1[0]) / 1000.0f);
+	// 	_cell_voltages[1] = ((float)((DAstatus1[3] << 8) | DAstatus1[2]) / 1000.0f);
+	// 	_cell_voltages[2] = ((float)((DAstatus1[5] << 8) | DAstatus1[4]) / 1000.0f);
+	// 	_cell_voltages[3] = ((float)((DAstatus1[7] << 8) | DAstatus1[6]) / 1000.0f);
 
-		_pack_power = ((float)((DAstatus1[29] << 8) | DAstatus1[28]) / 100.0f); //TODO: decide if both needed
-		_pack_average_power = ((float)((DAstatus1[31] << 8) | DAstatus1[30]) / 100.0f);
+	// 	_pack_power = ((float)((DAstatus1[29] << 8) | DAstatus1[28]) / 100.0f); //TODO: decide if both needed
+	// 	_pack_average_power = ((float)((DAstatus1[31] << 8) | DAstatus1[30]) / 100.0f);
 
-		uint8_t DAstatus3[18 + 2] = {}; // 18 bytes of data and 2 bytes of address
+	// 	uint8_t DAstatus3[18 + 2] = {}; // 18 bytes of data and 2 bytes of address
 
-		//TODO: need to consider if set voltages to 0? -1?
-		// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS3, DAstatus3, sizeof(DAstatus3))) {
-		// 	return PX4_ERROR;
-		// }
+	// 	//TODO: need to consider if set voltages to 0? -1?
+	// 	// if (PX4_OK != manufacturer_read(BATT_SMBUS_DASTATUS3, DAstatus3, sizeof(DAstatus3))) {
+	// 	// 	return PX4_ERROR;
+	// 	// }
 
-		_cell_voltages[4] = ((float)((DAstatus3[1] << 8) | DAstatus3[0]) / 1000.0f);
-		_cell_voltages[5] = ((float)((DAstatus3[7] << 8) | DAstatus3[6]) / 1000.0f);
-		_cell_voltages[6] = ((float)((DAstatus3[13] << 8) | DAstatus3[12]) / 1000.0f);
+	// 	_cell_voltages[4] = ((float)((DAstatus3[1] << 8) | DAstatus3[0]) / 1000.0f);
+	// 	_cell_voltages[5] = ((float)((DAstatus3[7] << 8) | DAstatus3[6]) / 1000.0f);
+	// 	_cell_voltages[6] = ((float)((DAstatus3[13] << 8) | DAstatus3[12]) / 1000.0f);
 
-	}
+	// }
 
-	//Calculate max cell delta
-	_min_cell_voltage = _cell_voltages[0];
-	float max_cell_voltage = _cell_voltages[0];
+	// //Calculate max cell delta
+	// _min_cell_voltage = _cell_voltages[0];
+	// float max_cell_voltage = _cell_voltages[0];
 
-	for (uint8_t i = 1; (i < _cell_count && i < (sizeof(_cell_voltages) / sizeof(_cell_voltages[0]))); i++) {
-		_min_cell_voltage = math::min(_min_cell_voltage, _cell_voltages[i]);
-		max_cell_voltage = math::max(max_cell_voltage, _cell_voltages[i]);
-	}
+	// for (uint8_t i = 1; (i < _cell_count && i < (sizeof(_cell_voltages) / sizeof(_cell_voltages[0]))); i++) {
+	// 	_min_cell_voltage = math::min(_min_cell_voltage, _cell_voltages[i]);
+	// 	max_cell_voltage = math::max(max_cell_voltage, _cell_voltages[i]);
+	// }
 
-	// Calculate the max difference between the min and max cells with complementary filter.
-	_max_cell_voltage_delta = (0.5f * (max_cell_voltage - _min_cell_voltage)) +
-				  (0.5f * _last_report.max_cell_voltage_delta);
+	// // Calculate the max difference between the min and max cells with complementary filter.
+	// _max_cell_voltage_delta = (0.5f * (max_cell_voltage - _min_cell_voltage)) +
+	// 			  (0.5f * _last_report.max_cell_voltage_delta);
 
-	return ret;
-}
+	// return ret;
+// }
 
-void BATT_SMBUS::set_undervoltage_protection(float average_current)
-{
-	// Disable undervoltage protection if armed. Enable if disarmed and cell voltage is above limit.
-	if (average_current > BATT_CURRENT_UNDERVOLTAGE_THRESHOLD) {
-		if (_cell_undervoltage_protection_status != 0) {
-			// Disable undervoltage protection
-			uint8_t protections_a_tmp = BATT_SMBUS_ENABLED_PROTECTIONS_A_CUV_DISABLED;
-			uint16_t address = BATT_SMBUS_ENABLED_PROTECTIONS_A_ADDRESS;
+// void BATT_SMBUS::set_undervoltage_protection(float average_current)
+// {
+// 	// Disable undervoltage protection if armed. Enable if disarmed and cell voltage is above limit.
+// 	if (average_current > BATT_CURRENT_UNDERVOLTAGE_THRESHOLD) {
+// 		if (_cell_undervoltage_protection_status != 0) {
+// 			// Disable undervoltage protection
+// 			uint8_t protections_a_tmp = BATT_SMBUS_ENABLED_PROTECTIONS_A_CUV_DISABLED;
+// 			uint16_t address = BATT_SMBUS_ENABLED_PROTECTIONS_A_ADDRESS;
 
-			if (dataflash_write(address, &protections_a_tmp, 1) == PX4_OK) {
-				_cell_undervoltage_protection_status = 0;
-				PX4_WARN("Disabled CUV");
+// 			if (dataflash_write(address, &protections_a_tmp, 1) == PX4_OK) {
+// 				_cell_undervoltage_protection_status = 0;
+// 				PX4_WARN("Disabled CUV");
 
-			} else {
-				PX4_WARN("Failed to disable CUV");
-			}
-		}
+// 			} else {
+// 				PX4_WARN("Failed to disable CUV");
+// 			}
+// 		}
 
-	} else {
-		if (_cell_undervoltage_protection_status == 0) {
-			if (_min_cell_voltage > BATT_VOLTAGE_UNDERVOLTAGE_THRESHOLD) {
-				// Enable undervoltage protection
-				uint8_t protections_a_tmp = BATT_SMBUS_ENABLED_PROTECTIONS_A_DEFAULT;
-				uint16_t address = BATT_SMBUS_ENABLED_PROTECTIONS_A_ADDRESS;
+// 	} else {
+// 		if (_cell_undervoltage_protection_status == 0) {
+// 			if (_min_cell_voltage > BATT_VOLTAGE_UNDERVOLTAGE_THRESHOLD) {
+// 				// Enable undervoltage protection
+// 				uint8_t protections_a_tmp = BATT_SMBUS_ENABLED_PROTECTIONS_A_DEFAULT;
+// 				uint16_t address = BATT_SMBUS_ENABLED_PROTECTIONS_A_ADDRESS;
 
-				if (dataflash_write(address, &protections_a_tmp, 1) == PX4_OK) {
-					_cell_undervoltage_protection_status = 1;
-					PX4_WARN("Enabled CUV");
+// 				if (dataflash_write(address, &protections_a_tmp, 1) == PX4_OK) {
+// 					_cell_undervoltage_protection_status = 1;
+// 					PX4_WARN("Enabled CUV");
 
-				} else {
-					PX4_WARN("Failed to enable CUV");
-				}
-			}
-		}
-	}
+// 				} else {
+// 					PX4_WARN("Failed to enable CUV");
+// 				}
+// 			}
+// 		}
+// 	}
 
-}
+// }
 
 //@NOTE: Currently unused, could be helpful for debugging a parameter set though.
 // int BATT_SMBUS::dataflash_read(const uint16_t address, void *data, const unsigned length)
@@ -381,9 +385,9 @@ int BATT_SMBUS::get_startup_info()
 	param_get(param_find("BAT1_N_CELLS"), &cell_count_param);
 	_cell_count = math::min((uint8_t)cell_count_param, MAX_NUM_OF_CELLS);
 
-	ret |= _interface->block_read(BATT_SMBUS_MANUFACTURER_NAME, _manufacturer_name, BATT_SMBUS_MANUFACTURER_NAME_SIZE,
-				      true);
-	_manufacturer_name[sizeof(_manufacturer_name) - 1] = '\0';
+	// ret |= _interface->block_read(BATT_SMBUS_MANUFACTURER_NAME, _manufacturer_name, BATT_SMBUS_MANUFACTURER_NAME_SIZE,
+	// 			      true);
+	// _manufacturer_name[sizeof(_manufacturer_name) - 1] = '\0';
 
 	uint16_t serial_num;
 	ret |= _interface->read_word(BATT_SMBUS_SERIAL_NUMBER, serial_num);
@@ -397,8 +401,8 @@ int BATT_SMBUS::get_startup_info()
 	uint16_t full_cap;
 	ret |= _interface->read_word(BATT_SMBUS_FULL_CHARGE_CAPACITY, full_cap);
 
-	uint16_t manufacture_date;
-	ret |= _interface->read_word(BATT_SMBUS_MANUFACTURE_DATE, manufacture_date);
+	// uint16_t manufacture_date;
+	// ret |= _interface->read_word(BATT_SMBUS_MANUFACTURE_DATE, manufacture_date);
 
 	uint16_t state_of_health;
 	ret |= _interface->read_word(BATT_SMBUS_STATE_OF_HEALTH, state_of_health);
@@ -406,7 +410,7 @@ int BATT_SMBUS::get_startup_info()
 	/* ManufacturerAccess dummy command to init the ManufacturerBlockAccess routine
 	in the BQ40Zx0 and avoid timeout during LifetimeDataFlush.
 	test Sleep > 20 ms to give time to init the ManufacturerBlockAccess routine*/
-	ret |= _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, BATT_SMBUS_DEVICE_TYPE);
+	// ret |= _interface->write_word(BATT_SMBUS_MANUFACTURER_ACCESS, BATT_SMBUS_DEVICE_TYPE);
 	px4_usleep(30_ms);
 
 	if (!ret) {
@@ -414,24 +418,24 @@ int BATT_SMBUS::get_startup_info()
 		_batt_startup_capacity = (uint16_t)((float)remaining_cap * _c_mult);
 		_cycle_count = cycle_count;
 		_batt_capacity = (uint16_t)((float)full_cap * _c_mult);
-		_manufacture_date = manufacture_date;
+		// _manufacture_date = manufacture_date;
 		_state_of_health = state_of_health;
 	}
 
-	if (lifetime_data_flush() == PX4_OK) {
-		// Flush needs time to complete, otherwise device is busy. 100ms not enough, 200ms works.
-		px4_usleep(200_ms);
+	// if (lifetime_data_flush() == PX4_OK) {
+	// 	// Flush needs time to complete, otherwise device is busy. 100ms not enough, 200ms works.
+	// 	px4_usleep(200_ms);
 
-		if (lifetime_read_block_one() == PX4_OK) {
-			if (_lifetime_max_delta_cell_voltage > BATT_CELL_VOLTAGE_THRESHOLD_FAILED) {
-				PX4_WARN("Battery Damaged Will Not Fly. Lifetime max voltage difference: %4.2f",
-					 (double)_lifetime_max_delta_cell_voltage);
-			}
-		}
+	// 	if (lifetime_read_block_one() == PX4_OK) {
+	// 		if (_lifetime_max_delta_cell_voltage > BATT_CELL_VOLTAGE_THRESHOLD_FAILED) {
+	// 			PX4_WARN("Battery Damaged Will Not Fly. Lifetime max voltage difference: %4.2f",
+	// 				 (double)_lifetime_max_delta_cell_voltage);
+	// 		}
+	// 	}
 
-	} else {
-		PX4_WARN("Failed to flush lifetime data");
-	}
+	// } else {
+	// 	PX4_WARN("Failed to flush lifetime data");
+	// }
 
 	return ret;
 }
@@ -583,16 +587,16 @@ BATT_SMBUS::custom_method(const BusCLIArguments &cli)
 {
 	switch(cli.custom1) {
 		case 1: {
-			PX4_INFO("The manufacturer name: %s", _manufacturer_name);
-			PX4_INFO("The manufacturer date: %" PRId16, _manufacture_date);
+			// PX4_INFO("The manufacturer name: %s", _manufacturer_name);
+			// PX4_INFO("The manufacturer date: %" PRId16, _manufacture_date);
 			PX4_INFO("The serial number: %d" PRId16, _serial_number);
 		}
 			break;
 		case 2:
-			unseal();
+			// unseal();
 			break;
 		case 3:
-			seal();
+			// seal();
 			break;
 		case 4:
 			suspend();
@@ -601,16 +605,16 @@ BATT_SMBUS::custom_method(const BusCLIArguments &cli)
 			resume();
 			break;
 		case 6:
-			if (cli.custom_data) {
-				unsigned address = cli.custom2;
-				uint8_t *tx_buf = (uint8_t*)cli.custom_data;
-				unsigned length = tx_buf[0];
+			// if (cli.custom_data) {
+			// 	unsigned address = cli.custom2;
+			// 	uint8_t *tx_buf = (uint8_t*)cli.custom_data;
+			// 	unsigned length = tx_buf[0];
 
-				if (PX4_OK != dataflash_write(address, tx_buf+1, length)) {
-					PX4_ERR("Dataflash write failed: %u", address);
-				}
-				px4_usleep(100_ms);
-			}
+			// 	if (PX4_OK != dataflash_write(address, tx_buf+1, length)) {
+			// 		PX4_ERR("Dataflash write failed: %u", address);
+			// 	}
+			// 	px4_usleep(100_ms);
+			// }
 			break;
 	}
 }

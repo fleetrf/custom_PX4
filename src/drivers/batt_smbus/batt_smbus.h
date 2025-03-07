@@ -68,7 +68,7 @@ using namespace time_literals;
 #define BATT_CURRENT_UNDERVOLTAGE_THRESHOLD             5.0f            ///< Threshold in amps to disable undervoltage protection
 #define BATT_VOLTAGE_UNDERVOLTAGE_THRESHOLD             3.4f            ///< Threshold in volts to re-enable undervoltage protection
 
-#define BATT_SMBUS_ADDR                                 0x0B            ///< Default 7 bit address I2C address. 8 bit = 0x16
+#define BATT_SMBUS_ADDR                                 0x55            ///< Default 7 bit address I2C address. 8 bit = 0x16
 
 #define BATT_SMBUS_TEMP                                 0x0C            ///< temperature register
 #define BATT_SMBUS_VOLTAGE                              0x08            ///< voltage register
@@ -149,7 +149,7 @@ public:
 	 * @param data The returned data.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int dataflash_read(const uint16_t address, void *data, const unsigned length);
+	// int dataflash_read(const uint16_t address, void *data, const unsigned length);
 
 	/**
 	 * @brief Writes data to flash.
@@ -158,7 +158,7 @@ public:
 	 * @param length The number of bytes being written.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int dataflash_write(const uint16_t address, void *data, const unsigned length);
+	// int dataflash_write(const uint16_t address, void *data, const unsigned length);
 
 	/**
 	* @brief Read info from battery on startup.
@@ -173,7 +173,7 @@ public:
 	 * @param length The number of bytes being written.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int manufacturer_read(const uint16_t cmd_code, void *data, const unsigned length);
+	// int manufacturer_read(const uint16_t cmd_code, void *data, const unsigned length);
 
 	/**
 	 * @brief Performs a ManufacturerBlockAccess() write command.
@@ -182,42 +182,42 @@ public:
 	 * @param length The number of bytes being written.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int manufacturer_write(const uint16_t cmd_code, void *data, const unsigned length);
+	// int manufacturer_write(const uint16_t cmd_code, void *data, const unsigned length);
 
 	/**
 	 * @brief Unseals the battery to allow writing to restricted flash.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int unseal();
+	// int unseal();
 
 	/**
 	 * @brief Seals the battery to disallow writing to restricted flash.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int seal();
+	// int seal();
 
 	/**
 	 * @brief This command flushes the RAM Lifetime Data to data flash to help streamline evaluation testing.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int lifetime_data_flush();
+	// int lifetime_data_flush();
 
 	/**
 	 * @brief Reads the lifetime data from block 1.
 	 * @return Returns PX4_OK on success, PX4_ERROR on failure.
 	 */
-	int lifetime_read_block_one();
+	// int lifetime_read_block_one();
 
 	/**
 	 * @brief Reads the cell voltages.
 	 * @return Returns PX4_OK on success or associated read error code on failure.
 	 */
-	int get_cell_voltages();
+	// int get_cell_voltages();
 
 	/**
 	 * @brief Enables or disables the cell under voltage protection emergency shut off.
 	 */
-	void set_undervoltage_protection(float average_current);
+	// void set_undervoltage_protection(float average_current);
 
 	void suspend();
 
@@ -275,10 +275,10 @@ private:
 	float _c_mult{0.f};
 
 	/** @param _manufacturer_name Name of the battery manufacturer. */
-	char _manufacturer_name[BATT_SMBUS_MANUFACTURER_NAME_SIZE + 1] {};	// Plus one for terminator
+	// char _manufacturer_name[BATT_SMBUS_MANUFACTURER_NAME_SIZE + 1] {};	// Plus one for terminator
 
 	/** @param _manufacture_date Date of the battery manufacturing. */
-	uint16_t _manufacture_date{0};
+	// uint16_t _manufacture_date{0};
 
 	/** @param _state_of_health state of health as read on connection  */
 	float _state_of_health{0.f};
