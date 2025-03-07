@@ -119,6 +119,19 @@ then
 	tf02pro start -X
 fi
 
+# tfminis i2c distance sensor
+if param compare -s SENS_EN_TFMINIS 1
+then
+# weird placeholder... for some reason,the first one never starts an instance
+	tfminis start -X
+# start back facing
+	tfminis start -X -b 2 -A 0
+# start left facing
+	tfminis start -X -b 2 -A 1
+# start rght facing
+	tfminis start -X -b 2 -A 2
+fi
+
 # ADIS16448 spi external IMU
 if param compare -s SENS_EN_ADIS164X 1
 then
