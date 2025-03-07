@@ -1,0 +1,63 @@
+module_name: tfminis
+
+parameters:
+    - group: Sensors
+      definitions:
+        SENS_EN_TFMINIS:
+            description:
+                short: Enable TFMINIS distance sensor (I2C)
+                long: |
+                    Enable TFMINIS (I2C) distance sensor and also
+                    the collision avoidance basic module
+
+            type: boolean
+            reboot_required: true
+            num_instances: 1
+            instance_start: 0
+            default: 1    #for each instance
+
+        NUM_TFMINIS:
+            description:
+                short: Number of TFMINIS (I2C) Sensors
+                long: |
+                    Number of TFMINIS (I2C) Sensors
+            type: int32
+            min: 3
+            max: 6
+            reboot_required: true
+            num_instances: 1
+            instance_start: 0
+            default: 3    #3 sesnors temporarily
+
+        TFMINIS_0_ADDR:
+            description:
+                short: TFMINIS (I2C) instance 0 address
+                long: |
+                    Set the addresses for instance 0 of TFMINIS (I2C)
+            type: int32
+            reboot_required: true
+            num_instances: 1
+            default: 17    #for each instance
+
+        TFMINIS_1_ADDR:
+            description:
+                short: TFMINIS (I2C) instance 1 address
+                long: |
+                    Set the addresses for instance 1 of TFMINIS (I2C)
+            type: int32
+            reboot_required: true
+            num_instances: 1
+            default: 18    #for each instance
+
+        TFMINIS_2_ADDR:
+            description:
+                short: TFMINIS (I2C) instance 2 address
+                long: |
+                    Set the addresses for instance 2 of TFMINIS (I2C)
+            type: int32
+            reboot_required: true
+            num_instances: 1
+            default: 32    #for each instance
+
+
+#use command keyword to execute script command on startup
