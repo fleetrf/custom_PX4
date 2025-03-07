@@ -60,7 +60,10 @@ BATT_SMBUS::BATT_SMBUS(const I2CSPIDriverConfig &config, SMBus *interface) :
 
 
 	//TODO: probe the device and autodetect its type
-	if ((SMBUS_DEVICE_TYPE)batt_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
+	if ((SMBUS_DEVICE_TYPE)batt_device_type == SMBUS_DEVICE_TYPE::BQ34Z100) {
+		_device_type = SMBUS_DEVICE_TYPE::BQ34Z100;
+
+	} else if ((SMBUS_DEVICE_TYPE)batt_device_type == SMBUS_DEVICE_TYPE::BQ40Z80) {
 		_device_type = SMBUS_DEVICE_TYPE::BQ40Z80;
 
 	} else {
@@ -108,10 +111,18 @@ void BATT_SMBUS::RunImpl()
 
 	ret |= _interface->read_word(BATT_SMBUS_VOLTAGE, result);
 
-	ret |= get_cell_voltages();
+	if(!(_device_type == SMBUS_DEVICE_TYPE::BQ34Z100)){		//bq34z100 cannot read individual cell voltages; only overall
 
-	for (int i = 0; i < _cell_count; i++) {
-		new_report.voltage_cell_v[i] = _cell_voltages[i];
+		ret |= get_cell_voltages();
+
+		for (int i = 0; i < _cell_count; i++) {
+			new_report.voltage_cell_v[i] = _cell_voltages[i];
+		}
+	} else{
+
+		for (int i = 0; i < _cell_count; i++) {
+			new_report.voltage_cell_v[i] = 65535;			//default value when cell voltage is not known
+		}
 	}
 
 	// Convert millivolts to volts.

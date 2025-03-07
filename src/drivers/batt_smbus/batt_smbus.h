@@ -119,10 +119,12 @@ using namespace time_literals;
 #define BATT_SMBUS_ENABLED_PROTECTIONS_A_DEFAULT        0xcf
 #define BATT_SMBUS_ENABLED_PROTECTIONS_A_CUV_DISABLED   0xce
 
+
 enum class SMBUS_DEVICE_TYPE {
 	UNDEFINED     = 0,
 	BQ40Z50       = 1,
 	BQ40Z80       = 2,
+	BQ34Z100      = 3,
 };
 
 class BATT_SMBUS : public I2CSPIDriver<BATT_SMBUS>

@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * SMBUS Smart battery driver BQ40Z50 and BQ40Z80
+ * SMBUS Smart battery driver BQ40Z50 and BQ40Z80 AND BQ34Z100
  *
  * @reboot_required true
  *
@@ -60,5 +60,6 @@ PARAM_DEFINE_FLOAT(BAT1_C_MULT, 1.0f);
  * @value 0 AutoDetect
  * @value 1 BQ40Z50 based
  * @value 2 BQ40Z80 based
+ * @value 3 BQ34Z100 based
  */
 PARAM_DEFINE_INT32(BAT1_SMBUS_MODEL, 0);
